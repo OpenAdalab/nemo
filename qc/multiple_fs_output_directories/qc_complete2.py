@@ -2,8 +2,8 @@ import csv
 import os
 import pandas as pd
 from fsqc.outlierDetection import readAsegStats, readAparcStats
-from outlierDetection import outlierDetection_normalized, outlierTable
-from config import FREESURFER_FSQC, FREESURFER_OUTPUTS, DIR_FREESURFER
+from outlierDetection2 import outlierDetection_normalized, outlierTable
+from config2 import FREESURFER_FSQC, FREESURFER_OUTPUTS, DIR_FREESURFER
 
 
 def load_fsqc_results(fsqc_results_path):
@@ -30,7 +30,7 @@ def convert_radians_to_degrees(df):
     return df
 
 
-def normalize_aseg_volumes(subjects, subjects_dir, columns_to_exclude, columns_to_skip):
+def normalize_aseg_volumes(subjects, subject_dir_map, columns_to_exclude, columns_to_skip):
     """
     Extract ETIV value for each subject.
     Normalize ASEG volumes by EstimatedTotalIntraCranialVol and save it in a csv file.
@@ -43,7 +43,7 @@ def normalize_aseg_volumes(subjects, subjects_dir, columns_to_exclude, columns_t
     """
     df_etiv = pd.DataFrame()
     for subject in subjects:
-        path_aseg_stats = os.path.join(subjects_dir, subject, "stats", "aseg.stats")
+        path_aseg_stats = os.path.join(subject_dir_map[subject], subject, "stats", "aseg.stats")
         aseg_stats = readAsegStats(path_aseg_stats)
         df_aseg = pd.DataFrame([aseg_stats])
         df_subj = pd.DataFrame()
@@ -54,11 +54,11 @@ def normalize_aseg_volumes(subjects, subjects_dir, columns_to_exclude, columns_t
         df_aseg_norm = df_aseg_norm.drop(columns=columns_to_exclude)
         df_aseg_norm = df_aseg_norm.drop(columns=columns_to_skip)
         df_aseg_norm = df_aseg_norm.div(df_aseg['aseg.EstimatedTotalIntraCranialVol'], axis=0)
-        df_aseg_norm.to_csv(os.path.join(subjects_dir, subject, "stats", "aseg_stats_norm.csv"), index=False)
+        df_aseg_norm.to_csv(os.path.join(subjects_dir_map[subject], subject, "stats", "aseg_stats_norm.csv"), index=False)
     return df_etiv
 
 
-def calculate_outliers(subjects, subjects_dir, outlier_outdir, outlier_params):
+def calculate_outliers(subjects, subject_dir_map, outlier_outdir, outlier_params):
     """
     Adapted from fsqc.fsqcMain.py (line 2726).
     Compute outliers for each subject compared to the sample for the following values :
@@ -107,7 +107,7 @@ def calculate_outliers(subjects, subjects_dir, outlier_outdir, outlier_params):
         n_outlier_norms,
     ) = outlierDetection_normalized(
         subjects,
-        subjects_dir,
+        subjects_dir_map,
         outlier_outdir,
         outlierDict,
         min_no_subjects=outlier_params['min_no_subjects'],
@@ -134,12 +134,21 @@ def calculate_outliers(subjects, subjects_dir, outlier_outdir, outlier_params):
     df_outliers = pd.DataFrame(outlierDict).T.reset_index()
     df_outliers = df_outliers.rename(columns={'index': 'subject'})
 
-    return df_group_stats, df_outliers
+    return df_group_stats, n_outlier_sample_nonpar, n_outlier_sample_param, n_outlier_norms
 
 
 if __name__ == "__main__":
+ # Find all subjects and their parent directories
+    subjects = []
+    subject_dir_map = {}
+    for parent_dir in FREESURFER_OUTPUTS:
+        for subj in os.listdir(parent_dir):
+            subj_path = os.path.join(parent_dir, subj)
+            if os.path.isdir(subj_path):
+                subjects.append(subj)
+                subject_dir_map[subj] = parent_dir
     fsqc_results_path = os.path.join(FREESURFER_FSQC, "fsqc-results.csv")
-    check_log_path = os.path.join(FREESURFER_FSQC, "check_log.csv")
+    check_log_path = os.path.join(DIR_FREESURFER, "check_log.csv")
     group_statistics_path = os.path.join(FREESURFER_FSQC, "group_stats.csv")
     fsqc_complete_path = os.path.join(FREESURFER_FSQC, "fsqc-results-complete.csv")
     subjects_dir = FREESURFER_OUTPUTS
@@ -166,9 +175,9 @@ if __name__ == "__main__":
     df = convert_radians_to_degrees(df)
     # Normalize ASEG volumes by ETIV
     subjects = df['subject'].tolist()
-    df_etiv = normalize_aseg_volumes(subjects, subjects_dir, columns_to_exclude, columns_to_skip)
+    df_etiv = normalize_aseg_volumes(subjects, subjects_dir_map, columns_to_exclude, columns_to_skip)
     # Calculate outliers and save new group aparc/aseg statistics
-    df_group_stats, df_outliers = calculate_outliers(subjects, subjects_dir, outliers_dir, outlier_params)
+    df_group_stats, df_outliers = calculate_outliers(subjects, subjects_dir_map, outliers_dir, outlier_params)
     df_group_stats.reset_index(inplace=True)
     df_group_stats.to_csv(group_statistics_path, index=False)
     # Merge QC dataframes
