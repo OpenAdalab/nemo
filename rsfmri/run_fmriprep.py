@@ -154,6 +154,16 @@ def generate_slurm_fmriprep_script(config, subject, session, path_to_script, fs_
 
         f'echo "------ Running {fmriprep["fmriprep_container"]} for subject: {subject}, session: {session} --------"\n'
     )
+    
+    if job_ids:
+        if isinstance(job_ids, str):
+            dependency = [job_ids]
+        else:
+            dependency = [jid for jid in job_ids if jid]
+        header += (
+            f'#SBATCH --dependency=afterok:{":".join(dependency)}\n'
+        )
+    
 
     tmp_dir_setup = (
         f'\nhostname\n'
@@ -169,12 +179,6 @@ def generate_slurm_fmriprep_script(config, subject, session, path_to_script, fs_
         f'echo "Using TMP_WORK_DIR = $TMP_WORK_DIR"\n'
         f'echo "Using OUT_FMRIPREP_DIR = {common["derivatives"]}/fmriprep"\n'
     )
-
-    if job_ids:
-        header += (
-            f'#SBATCH --dependency=afterok:{":".join(job_ids)}\n'
-        )
-
         
     prereq_check = (
     

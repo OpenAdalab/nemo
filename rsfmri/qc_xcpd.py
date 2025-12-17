@@ -30,9 +30,6 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
     mriqc = config["mriqc"]
     DERIVATIVES_DIR = common["derivatives"]
 
-    if job_ids is None:
-        job_ids = []
-
     header = (
         f'#!/bin/bash\n'
         f'#SBATCH --job-name=qc_xcpd_{subject}_{session}\n'
@@ -44,10 +41,14 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
     )
 
     if job_ids:
-        valid_ids = [str(jid) for jid in job_ids if isinstance(jid, str) and jid.strip()]
-        if valid_ids:
-            header += f'#SBATCH --dependency=afterok:{":".join(valid_ids)}\n'
-
+        if isinstance(job_ids, str):
+            dependency = [job_ids]
+        else:
+            dependency = [jid for jid in job_ids if jid]
+        header += (
+            f'#SBATCH --dependency=afterok:{":".join(dependency)}\n'
+        )
+    
     if common.get("email"):
         header += (
             f'#SBATCH --mail-type={common["email_frequency"]}\n'
