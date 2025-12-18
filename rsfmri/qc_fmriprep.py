@@ -37,8 +37,8 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
     header = (
         f'#!/bin/bash\n'
         f'#SBATCH --job-name=qc_fmriprep_{subject}_{session}\n'
-        f'#SBATCH --output={DERIVATIVES_DIR}/qc/fmriprep/stdout/mriqc_fmriprep_{subject}_{session}_%j.out\n'
-        f'#SBATCH --error={DERIVATIVES_DIR}/qc/fmriprep/stdout/mriqc_fmriprep_{subject}_{session}_%j.err\n'
+        f'#SBATCH --output={DERIVATIVES_DIR}/qc/fmriprep/stdout/qc_fmriprep_{subject}_{session}_%j.out\n'
+        f'#SBATCH --error={DERIVATIVES_DIR}/qc/fmriprep/stdout/qc_fmriprep_{subject}_{session}_%j.err\n'
         f'#SBATCH --mem={mriqc["requested_mem"]}\n'
         f'#SBATCH --time={mriqc["requested_time"]}\n'
         f'#SBATCH --partition={mriqc["partition"]}\n'
@@ -86,29 +86,26 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         f'echo "Using TMP_WORK_DIR = $TMP_WORK_DIR"\n'
         f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/mriqc_fmriprep"\n'
     )
-
+   
     prereq_check = (
-        f'\n# Check that fmriprep finished without error\n'
-        f'deriv_data_type_dir="{DERIVATIVES_DIR}/fmriprep/outputs/{subject}/{session}" \n'
-        f'if [ ! -d "$deriv_data_type_dir" ]; then\n'
+        f'\n# Check that FMRIPREP outputs exists\n'
+        f'if [ ! -d "{DERIVATIVES_DIR}/fmriprep/outputs/{subject}/{session}" ]; then\n'
+        f'    echo "[QC-FMRIPREP] Please run Fmriprep command before XCP-D."\n'
         f'    exit 1\n'
         f'fi\n'
-
-        f'stdout_dir="{DERIVATIVES_DIR}/fmriprep/stdout"\n'
-        f'prefix="fmriprep_{subject}_{session}"\n'
-        f'success_string="fMRIPrep finished successfully"\n'
+        
+        f'\n# Check that FMRIPREP finished without error\n'
+        f'prefix="{DERIVATIVES_DIR}/fmriprep/stdout/fmriprep_{subject}_{session}"\n'
         f'found_success=false\n'
         f'for file in $(ls $prefix*.out 2>/dev/null); do\n'
-        f'    if grep -q "$success_string" $file; then\n'
+        f'    if grep -q "fMRIPrep finished successfully" $file; then\n'
         f'        found_success=true\n'
-        f'        break\n'
         f'    fi\n'
         f'done\n'
         f'if [ "$found_success" = false ]; then\n'
-        f'    echo "[MRIQC] fmriprep did not terminate for {subject} {session}. Please run fmriprep command before."\n '
+        f'    echo "[QC-FMRIPREP] fMRIPrep did not terminate for {subject} {session}. Please run fMRIPrep command before QC."\n'
         f'    exit 1\n'
         f'fi\n'
-    
     )
 
     # Define the Singularity command for running MRIQC
@@ -142,13 +139,13 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         f'\necho "Cleaning up temporary work directory..."\n'
         f'\nchmod -Rf 771 {DERIVATIVES_DIR}/mriqc_fmriprep\n'
         f'\ncp -r $TMP_WORK_DIR/* {DERIVATIVES_DIR}/mriqc_fmriprep/work\n'
-        f'echo "Finished MRIQC-FMRIPREP for subject: {subject}, session: {session}"\n'
+        f'echo "Finished QC-FMRIPREP for subject: {subject}, session: {session}"\n'
     )
 
     # Write the complete SLURM script to the specified file
     with open(path_to_script, 'w') as f:
             f.write(header + module_export + prereq_check + tmp_dir_setup + singularity_cmd + python_command + save_work)
-    print(f"Created MRIQC-FMRIPREP SLURM job: {path_to_script} for subject {subject}, session {session}")
+    print(f"Created QC-FMRIPREP SLURM job: {path_to_script} for subject {subject}, session {session}")
 
 
 def run_qc_fmriprep(config, subject, session, job_ids=None):
@@ -182,6 +179,7 @@ def run_qc_fmriprep(config, subject, session, job_ids=None):
 
     # Create output (derivatives) directories
     os.makedirs(f"{DERIVATIVES_DIR}/qc/fmriprep", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/fmriprep/outputs", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qc/fmriprep/stdout", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qc/fmriprep/scripts", exist_ok=True)
 
