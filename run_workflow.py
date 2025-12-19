@@ -173,7 +173,7 @@ def main(config_file=None):
                     session=session,
                     job_ids=fmriprep_job_id
                 )
-                print(f"[MRIQC-FMRIPREP] job IDs: {qc_fprep_job_id}\n")
+                print(f"[QC-FMRIPREP] job IDs: {qc_fprep_job_id}\n")
             else:
                 qc_fprep_job_id = None
 
@@ -233,13 +233,13 @@ def main(config_file=None):
     # -------------------------------------------------------
     # GROUP-LEVEL MRIQC JOBS
     # -------------------------------------------------------
-    if workflow.get("run_mriqc_group"):
+    if workflow.get("run_group_mriqc"):
         print("🔹 Submitting MRIQC group-level jobs")
         # MRIQC group-level for raw data
         jid_mriqc_raw_group = run_mriqc_group(
             config,
             data_type="raw",
-            input_dir=BIDS_DIR
+            input_dir="{DERIVATIVES_DIR}/mriqc_raw/outputs"
         )
         print(f"[MRIQC-RAW-GROUP] job IDs: {jid_mriqc_raw_group}\n")
 
@@ -247,33 +247,33 @@ def main(config_file=None):
         jid_mriqc_fmriprep_group = run_mriqc_group(
             config,
             data_type="fmriprep",
-            input_dir=f"{DERIVATIVES_DIR}/fmriprep/outputs"
+            input_dir=f"{DERIVATIVES_DIR}/qc/fmriprep/outputs"
         )
         print(f"[MRIQC-FMRIPREP-GROUP] job IDs: {jid_mriqc_fmriprep_group}\n")
 
         # MRIQC group-level for qsiprep data
-        jid_mriqc_qsiprep_group = run_mriqc_group(
-            config,
-            data_type="qsiprep",
-            input_dir=f"{DERIVATIVES_DIR}/qsiprep/outputs"
-        )
-        print(f"[MRIQC-QSIPREP-GROUP] job IDs: {jid_mriqc_qsiprep_group}\n")
-
-        # MRIQC group-level for qsirecon data
-        jid_mriqc_qsirecon_group = run_mriqc_group(
-            config,
-            data_type="qsirecon",
-            input_dir=f"{DERIVATIVES_DIR}/qsirecon/outputs"
-        )
-        print(f"[MRIQC-QSIRECON-GROUP] job IDs: {jid_mriqc_qsirecon_group}\n")
-
-        # MRIQC group-level for xcpd data
-        jid_mriqc_xcpd_group = run_mriqc_group(
-            config,
-            data_type="xcpd",
-            input_dir=f"{DERIVATIVES_DIR}/xcpd/outputs"
-        )
-        print(f"[MRIQC-XCPD-GROUP] job IDs: {jid_mriqc_xcpd_group}\n")
+#        jid_mriqc_qsiprep_group = run_mriqc_group(
+#            config,
+#            data_type="qsiprep",
+#            input_dir=f"{DERIVATIVES_DIR}/qsiprep/outputs"
+#        )
+#        print(f"[MRIQC-QSIPREP-GROUP] job IDs: {jid_mriqc_qsiprep_group}\n")
+#
+#        # MRIQC group-level for qsirecon data
+#        jid_mriqc_qsirecon_group = run_mriqc_group(
+#            config,
+#            data_type="qsirecon",
+#            input_dir=f"{DERIVATIVES_DIR}/qsirecon/outputs"
+#        )
+#        print(f"[MRIQC-QSIRECON-GROUP] job IDs: {jid_mriqc_qsirecon_group}\n")
+#
+#        # MRIQC group-level for xcpd data
+#        jid_mriqc_xcpd_group = run_mriqc_group(
+#            config,
+#            data_type="xcpd",
+#            input_dir=f"{DERIVATIVES_DIR}/xcpd/outputs"
+#        )
+#        print(f"[MRIQC-XCPD-GROUP] job IDs: {jid_mriqc_xcpd_group}\n")
     # else:
     #     print("⚠️  Group-level MRIQC jobs skipped")
 

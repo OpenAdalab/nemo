@@ -8,6 +8,23 @@ import utils
 
 from config import config
 # ------------------------
+
+def is_mriqc_done(config, subject, session):
+    
+    DERIVATIVES_DIR = config["common"]["derivatives"]
+    stdout_dir = f"{DERIVATIVES_DIR}/qc/xcpd/stdout"
+    prefix = f"qc_xcpd_{subject}_{session}"
+    if os.path.exists(stdout_dir):
+        stdout_files = [f for f in os.listdir(stdout_dir) if (f.startswith(prefix) and f.endswith('.out'))]
+        for file in stdout_files:
+            file_path = os.path.join(stdout_dir, file)
+            with open(file_path, 'r') as f:
+                if 'MRIQC completed' in f.read():
+                    print(f"[MRIQC-XCPD] Skip already processed subject {subject}_{session}")
+                    return True            
+    return False
+    
+
 def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_ids=None):
     """
     Generate the SLURM script for MRIQC XCPD processing .
@@ -73,24 +90,24 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         f'elif [ -n "$TMPDIR" ]; then\n'
         f'    TMP_WORK_DIR="$TMPDIR"\n'
         f'else\n'
-        f'    TMP_WORK_DIR=$(mktemp -d /tmp/mriqc_xcpd_{subject}_{session})\n'
+        f'    TMP_WORK_DIR=$(mktemp -d /tmp/qc_xcpd_{subject}_{session})\n'
         f'fi\n'
 
         f'mkdir -p $TMP_WORK_DIR\n'
         f'chmod -Rf 771 $TMP_WORK_DIR\n'
         f'echo "Using TMP_WORK_DIR = $TMP_WORK_DIR"\n'
-        f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/mriqc_xcpd_{subject}_{session}"\n'
+        f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/qc/xcpd/{subject}_{session}"\n'
     )
 
     prereq_check = (
-        f'\n# Check that fmriprep finished without error\n'
+        f'\n# Check that XCP-D finished without error\n'
         f'deriv_data_type_dir="{DERIVATIVES_DIR}/xcpd/outputs/{subject}/{session}" \n'
         f'if [ ! -d "$deriv_data_type_dir" ]; then\n'
         f'    exit 1\n'
         f'fi\n'
 
         f'stdout_dir="{DERIVATIVES_DIR}/xcpd/stdout"\n'
-        f'prefix="xcpd_{subject}_{session}"\n'
+        f'prefix="{DERIVATIVES_DIR}/xcpd/stdout/xcpd_{subject}_{session}"\n'
         f'success_string="XCP-D finished successfully"\n'
         f'found_success=false\n'
         f'for file in $(ls $prefix*.out 2>/dev/null); do\n'
@@ -100,7 +117,7 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         f'    fi\n'
         f'done\n'
         f'if [ "$found_success" = false ]; then\n'
-        f'    echo "[MRIQC] XCP-D did not terminate for {subject} {session}. Please run XCP-D command before."\n '
+        f'    echo "[QC] XCP-D did not terminate for {subject} {session}. Please run XCP-D command before."\n '
         f'    exit 1\n'
         f'fi\n'
     
@@ -128,7 +145,9 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
     )
 
     python_command = (
+        f'\necho "running the qc_fmriprep_metrics_extraction.py script" \n'
         f'\npython3 rsfmri/qc_xcpd_metrics_extractions.py {config} {subject} {session}\n'
+        f'\necho "Python script execution done" \n'
     )
 
     save_work = (
@@ -168,6 +187,8 @@ def run_qc_xcpd(config, subject, session, job_ids=None):
 
     # Create output (derivatives) directories
     os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd/outputs", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd/work", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd/stdout", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd/scripts", exist_ok=True)
 

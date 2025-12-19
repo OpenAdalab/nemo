@@ -13,6 +13,23 @@ warnings.filterwarnings("ignore")
 # ------------------------
 # Create SLURM job script for MRIQC 
 # ------------------------
+
+def is_mriqc_done(config, subject, session):
+    
+    DERIVATIVES_DIR = config["common"]["derivatives"]
+    stdout_dir = f"{DERIVATIVES_DIR}/qc/fmriprep/stdout"
+    prefix = f"qc_fmriprep_{subject}_{session}"
+    if os.path.exists(stdout_dir):
+        stdout_files = [f for f in os.listdir(stdout_dir) if (f.startswith(prefix) and f.endswith('.out'))]
+        for file in stdout_files:
+            file_path = os.path.join(stdout_dir, file)
+            with open(file_path, 'r') as f:
+                if 'MRIQC completed' in f.read():
+                    print(f"[MRIQC-FMRIPREP] Skip already processed subject {subject}_{session}")
+                    return True            
+    return False
+    
+
 def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_ids=None):
     """Generate the SLURM job script.
     Parameters
@@ -65,6 +82,7 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
     module_export = (
         f'\nmodule purge\n'
         f'module load userspace/all\n'
+        f'module load python3/3.12.0\n'
         f'module load singularity\n'
 
         f'echo "------ Running {mriqc["mriqc_container"]} for subject: {subject}, session: {session} --------"\n'
@@ -78,19 +96,19 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         f'elif [ -n "$TMPDIR" ]; then\n'
         f'    TMP_WORK_DIR="$TMPDIR"\n'
         f'else\n'
-        f'    TMP_WORK_DIR=$(mktemp -d /tmp/mriqc_fmriprep_{subject}_{session})\n'
+        f'    TMP_WORK_DIR=$(mktemp -d /tmp/qc_fmriprep_{subject}_{session})\n'
         f'fi\n'
 
         f'mkdir -p $TMP_WORK_DIR\n'
         f'chmod -Rf 771 $TMP_WORK_DIR\n'
         f'echo "Using TMP_WORK_DIR = $TMP_WORK_DIR"\n'
-        f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/mriqc_fmriprep"\n'
+        f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/qc/fmriprep"\n'
     )
    
     prereq_check = (
         f'\n# Check that FMRIPREP outputs exists\n'
         f'if [ ! -d "{DERIVATIVES_DIR}/fmriprep/outputs/{subject}/{session}" ]; then\n'
-        f'    echo "[QC-FMRIPREP] Please run Fmriprep command before XCP-D."\n'
+        f'    echo "[QC-FMRIPREP] Please run Fmriprep command before QC."\n'
         f'    exit 1\n'
         f'fi\n'
         
@@ -132,21 +150,30 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
     
     # Call to python scripts for the rest of QC
     python_command = (
+        f'\necho "running the qc_fmriprep_metrics_extraction.py script" \n'
         f'\npython3 rsfmri/qc_fmriprep_metrics_extractions.py {config} {subject} {session}\n'
+        f'\necho "Python script execution done" \n'
                 )
     
     save_work = (
         f'\necho "Cleaning up temporary work directory..."\n'
-        f'\nchmod -Rf 771 {DERIVATIVES_DIR}/mriqc_fmriprep\n'
-        f'\ncp -r $TMP_WORK_DIR/* {DERIVATIVES_DIR}/mriqc_fmriprep/work\n'
+        f'\nchmod -Rf 771 {DERIVATIVES_DIR}/qc/fmriprep\n'
+        f'\ncp -r $TMP_WORK_DIR/* {DERIVATIVES_DIR}/qc/fmriprep/work\n'
         f'echo "Finished QC-FMRIPREP for subject: {subject}, session: {session}"\n'
     )
 
-    # Write the complete SLURM script to the specified file
-    with open(path_to_script, 'w') as f:
-            f.write(header + module_export + prereq_check + tmp_dir_setup + singularity_cmd + python_command + save_work)
-    print(f"Created QC-FMRIPREP SLURM job: {path_to_script} for subject {subject}, session {session}")
-
+    if not is_mriqc_done(config, subject, session):
+        # Write the complete SLURM script to the specified file
+        with open(path_to_script, 'w') as f:
+                f.write(header + module_export + prereq_check + tmp_dir_setup + singularity_cmd + python_command + save_work)
+        print(f"Created QC-FMRIPREP with MRIQC container SLURM job: {path_to_script} for subject {subject}, session {session}")
+        
+    else:
+        # Write the SLURM script only for the python_command to the specified file
+        with open(path_to_script, 'w') as f:
+                f.write(header + module_export + prereq_check + python_command + save_work)
+        print(f"Created QC-FMRIPREP for python only SLURM job: {path_to_script} for subject {subject}, session {session}")
+        
 
 def run_qc_fmriprep(config, subject, session, job_ids=None):
     """
@@ -181,12 +208,12 @@ def run_qc_fmriprep(config, subject, session, job_ids=None):
     os.makedirs(f"{DERIVATIVES_DIR}/qc/fmriprep", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qc/fmriprep/outputs", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qc/fmriprep/stdout", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/fmriprep/scripts", exist_ok=True)
-
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/fmriprep/scripts", exist_ok=True)  
+        
     path_to_script = f"{DERIVATIVES_DIR}/qc/fmriprep/scripts/qc_fmriprep_{subject}_{session}.slurm"
     generate_slurm_mriqc_script(config, subject, session, path_to_script, job_ids=job_ids)
 
     cmd = f"sbatch {path_to_script}"
-    print(f"[QC-XCPD] Submitting job: {cmd}")
+    print(f"[QC-FMRIPREP] Submitting job: {cmd}")
     job_id = utils.submit_job(cmd)
     return job_id

@@ -33,7 +33,7 @@ def is_already_processed(config, input_dir, data_type="raw"):
     if data_type not in ["raw", "fmriprep", "xcp_d", "qsiprep", "qsirecon"]:
         raise ValueError(f"Invalid data_type: {data_type}. Must be 'raw', 'fmriprep', or 'qsiprep'.")
 
-    stdout_dir = f"{DERIVATIVES_DIR}/mriqc_{data_type}/stdout"
+    stdout_dir = f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/stdout"
     if not os.path.exists(stdout_dir):
         print(f"[MRIQC] Could not read standard outputs from MRIQC, recomputing ....")
         return False
@@ -77,8 +77,8 @@ def generate_slurm_mriqc_script(config, input_dir, path_to_script, data_type="ra
     header = (
         f'#!/bin/bash\n'
         f'#SBATCH --job-name=group_mriqc_{data_type}\n'
-        f'#SBATCH --output={DERIVATIVES_DIR}/mriqc_{data_type}/stdout/group_mriqc_{data_type}_%j.out\n'
-        f'#SBATCH --error={DERIVATIVES_DIR}/mriqc_{data_type}/stdout/group_mriqc_{data_type}_%j.err\n'
+        f'#SBATCH --output={DERIVATIVES_DIR}/group_mriqc_{data_type}/stdout/group_mriqc_{data_type}_%j.out\n'
+        f'#SBATCH --error={DERIVATIVES_DIR}/group_mriqc_{data_type}/stdout/group_mriqc_{data_type}_%j.err\n'
         f'#SBATCH --mem={mriqc["requested_mem"]}\n'
         f'#SBATCH --time={mriqc["requested_time"]}\n'
         f'#SBATCH --partition={mriqc["partition"]}\n'
@@ -120,17 +120,17 @@ def generate_slurm_mriqc_script(config, input_dir, path_to_script, data_type="ra
         f'mkdir -p $TMP_WORK_DIR\n'
         f'chmod -Rf 771 $TMP_WORK_DIR\n'
         f'echo "Using TMP_WORK_DIR = $TMP_WORK_DIR"\n'
-        f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/mriqc_group_{data_type}"\n'
+        f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/group_mriqc_{data_type}"\n'
     )
 
     # Define the Singularity command for running MRIQC
     # Note: Unlike fmriprep, no config file is used here, the option doesn't exist for mriqc
-    # todo: input depends on data_type no ?
+
     singularity_cmd = (
         f'\napptainer run \\\n'
         f'    --cleanenv \\\n'
-        f'    -B {BIDS_DIR}:/data:ro \\\n'
-        f'    -B {DERIVATIVES_DIR}/mriqc_group_{data_type}/outputs:/out \\\n'
+        f'    -B {input_dir}:/data:ro \\\n'
+        f'    -B {DERIVATIVES_DIR}/group_mriqc_{data_type}/outputs:/out \\\n'
         f'    -B {mriqc["bids_filter_dir"]}:/bids_filter_dir \\\n'
         f'    {mriqc["mriqc_container"]} /data /out group \\\n'
         f'    --mem {mriqc["requested_mem"]} \\\n'
@@ -143,8 +143,8 @@ def generate_slurm_mriqc_script(config, input_dir, path_to_script, data_type="ra
 
     save_work = (
         f'\necho "Cleaning up temporary work directory..."\n'
-        f'\nchmod -Rf 771 {DERIVATIVES_DIR}/mriqc_group_{data_type}\n'
-        f'\ncp -r $TMP_WORK_DIR/* {DERIVATIVES_DIR}/mriqc_group_{data_type}/work\n'
+        f'\nchmod -Rf 771 {DERIVATIVES_DIR}/group_mriqc_{data_type}\n'
+        f'\ncp -r $TMP_WORK_DIR/* {DERIVATIVES_DIR}/group_mriqc_{data_type}/work\n'
         f'echo "Finished MRIQC for group input directory: {input_dir}"\n'
     )
 
@@ -175,11 +175,11 @@ def run_mriqc_group(config, input_dir, data_type="raw", job_ids=None):
     DERIVATIVES_DIR = config["common"]["derivatives"]
 
     # Create output (derivatives) directories
-    os.makedirs(f"{DERIVATIVES_DIR}/mriqc_group_{data_type}", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/mriqc_group_{data_type}/outputs", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/mriqc_group_{data_type}/stdout", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/mriqc_group_{data_type}/scripts", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/mriqc_group_{data_type}/work", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/group_mriqc_{data_type}", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/outputs", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/stdout", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/scripts", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/work", exist_ok=True)
 
     if job_ids is None:
         job_ids = []
@@ -188,7 +188,7 @@ def run_mriqc_group(config, input_dir, data_type="raw", job_ids=None):
         return None
 
     # Add dependency if this is not the first job in the chain
-    path_to_script = f"{DERIVATIVES_DIR}/mriqc_group_{data_type}/scripts/group_mriqc_{data_type}.slurm"
+    path_to_script = f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/scripts/group_mriqc_{data_type}.slurm"
     generate_slurm_mriqc_script(config, input_dir, data_type=data_type, path_to_script=path_to_script, job_ids=job_ids)
 
     cmd = f"sbatch {path_to_script}"

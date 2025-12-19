@@ -175,5 +175,5 @@ def run(config, subject, session):
     sub_ses = pd.DataFrame([row])
     # Save outputs to csv file
     path_to_qc = f"{DERIVATIVES_DIR}/qc/fmriprep/qc_{subject}_{session}.csv"
-    sub_ses.to_csv(path_to_qc, mode='a', header=False, index=False)
+    sub_ses.to_csv(path_to_qc, mode='w', header=False, index=False)
     print(f"QC saved in {path_to_qc}\n")
