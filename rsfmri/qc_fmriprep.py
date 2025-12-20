@@ -2,6 +2,11 @@
 
 import warnings
 import os
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
 
 from config import config
 from rsfmri.qc_fmriprep_metrics_extractions import run as extract_qc_metrics
@@ -53,6 +58,7 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
 
     header = (
         f'#!/bin/bash\n'
+        f'set -euo pipefail\n'
         f'#SBATCH --job-name=qc_fmriprep_{subject}_{session}\n'
         f'#SBATCH --output={DERIVATIVES_DIR}/qc/fmriprep/stdout/qc_fmriprep_{subject}_{session}_%j.out\n'
         f'#SBATCH --error={DERIVATIVES_DIR}/qc/fmriprep/stdout/qc_fmriprep_{subject}_{session}_%j.err\n'
@@ -134,6 +140,8 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
     singularity_cmd = (
             f'\napptainer run \\\n'
             f'    --cleanenv \\\n'
+            f'-B /scratch/hrasoanandrianina/code/nemo:/project \\\n'
+            f'--env PYTHONPATH=/project \\\n'
             f'    -B {input_dir}:/data:ro \\\n'
             f'    -B {DERIVATIVES_DIR}/qc/fmriprep/outputs:/out \\\n'
             f'    -B {mriqc["bids_filter_dir"]}:/bids_filter_dir \\\n'
@@ -150,11 +158,20 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         )
     
     # Call to python scripts for the rest of QC
+    # python_command = (
+    #     f'\necho "running the qc_fmriprep_metrics_extraction.py script" \n'
+    #     f'\npython3 rsfmri/qc_fmriprep_metrics_extractions.py {config} {subject} {session}\n'
+    #     f'\necho "Python script execution done" \n'
+    #             )
+    
     python_command = (
-        f'\necho "running the qc_fmriprep_metrics_extraction.py script" \n'
-        f'\npython3 rsfmri/qc_fmriprep_metrics_extractions.py {config} {subject} {session}\n'
-        f'\necho "Python script execution done" \n'
-                )
+    f'\necho "Running QC metrics extraction"\n'
+    f'python3 rsfmri/qc_fmriprep_metrics_extractions.py '
+    f'--config /project/config/config.toml '
+    f'--subject {subject} '
+    f'--session {session} '
+    f'|| {{ echo "[QC-FMRIPREP] Python QC extraction failed"; exit 1; }}\n'
+)
     
     save_work = (
         f'\necho "Cleaning up temporary work directory..."\n'
@@ -215,4 +232,8 @@ def run_qc_fmriprep(config, subject, session, job_ids=None):
 
     else:
         print(f"Performing only python command extraction for {subject}_{session}")
-        extract_qc_metrics(config, subject, session)
+        try:
+            extract_qc_metrics(config, subject, session)
+        except Exception as e:
+            print(f"[QC-FMRIPREP] ERROR during QC extraction: {e}", file=sys.stderr)
+            raise
