@@ -46,7 +46,6 @@ def main(config_file=None):
     # -------------------------------
     if not config_file:
         config_file = f"{Path(__file__).parent}/config/config.toml"
-        config_file = f"{Path(__file__).parent}/config/config.toml"
     config = utils.load_config(config_file)
 
     common = config["common"]
@@ -239,7 +238,7 @@ def main(config_file=None):
         jid_mriqc_raw_group = run_mriqc_group(
             config,
             data_type="raw",
-            input_dir="{DERIVATIVES_DIR}/mriqc_raw/outputs"
+            input_dir=f"{DERIVATIVES_DIR}/mriqc_raw/outputs"
         )
         print(f"[MRIQC-RAW-GROUP] job IDs: {jid_mriqc_raw_group}\n")
 

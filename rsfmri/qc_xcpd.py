@@ -6,6 +6,7 @@ from pathlib import Path
 import nibabel as nb
 import utils
 
+from rsfmri.qc_xcpd_metrics_extractions import run as extract_qc_metrics
 from config import config
 # ------------------------
 
@@ -80,6 +81,7 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         f'module load userspace/all\n'
         f'module load singularity\n'
         f'module load python3/3.12.0\n'
+        f'source /scratch/hrasoanandrianina/python_env/fmriprep_env/bin/activate \n'
     )
 
     tmp_dir_setup = (
@@ -192,10 +194,14 @@ def run_qc_xcpd(config, subject, session, job_ids=None):
     os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd/stdout", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd/scripts", exist_ok=True)
 
-    path_to_script = Path(f"{DERIVATIVES_DIR}/qc/xcpd/scripts/qc_xcpd_{subject}_{session}.slurm")
-    generate_slurm_mriqc_script(config, subject, session, path_to_script, job_ids)
+    if not is_mriqc_done(config, subject, session):
+        path_to_script = f"{DERIVATIVES_DIR}/qc/xcpd/scripts/qc_xcpd_{subject}_{session}.slurm"
+        generate_slurm_mriqc_script(config, subject, session, path_to_script, job_ids=job_ids)
+        cmd = f"sbatch {path_to_script}"
+        print(f"[QC-FMRIPREP] Submitting job: {cmd}")
+        job_id = utils.submit_job(cmd)
+        return job_id
 
-    cmd = f"sbatch {path_to_script}"
-    print(f"[QC-XCPD] Submitting job: {cmd}")
-    job_id = utils.submit_job(cmd)
-    return job_id
+    else:
+        print(f"Performing only python command extraction for {subject}_{session}")
+        extract_qc_metrics(config, subject, session)

@@ -110,7 +110,7 @@ def run(config, subject, session):
     DERIVATIVES_DIR = config["common"]["derivatives"]
     try:               
                 # Extract process status from log files
-                finished_status, runtime = utils.read_log(config, subject, session, run_type="fmriprep")
+                finished_status, runtime = utils.read_log(config, subject, session, runtype="fmriprep")
                 dir_count = utils.count_dirs(f"{DERIVATIVES_DIR}/fmriprep/{subject}/{session}")
                 file_count = utils.count_files(f"{DERIVATIVES_DIR}/fmriprep/{subject}/{session}")
 
@@ -172,7 +172,7 @@ def run(config, subject, session):
                 print(f"⚠️ Skipping {subject} {session}: {e}")
     print(f"Fmriprep Quality Check terminated successfully for {subject} {session}.")
     
-    sub_ses = pd.DataFrame([row])
+    sub_ses = pd.DataFrame(row)
     # Save outputs to csv file
     path_to_qc = f"{DERIVATIVES_DIR}/qc/fmriprep/qc_{subject}_{session}.csv"
     sub_ses.to_csv(path_to_qc, mode='w', header=False, index=False)
