@@ -79,8 +79,14 @@ In that case, it is recommended to stop the job and re-run it (sometimes several
 it is essential to save intermediate files on disk.
 
 ## func
-Sequence filtering : keep only resting state...
+Sequence filtering : keep only resting state fMRI tasks for the processing. Make sure your BIDS dataset is well organized, and also that the bids_filter file is in accordance with your dataset (especially the task name).
 
+A few additional parameters have been set in the config files. Beware that the parameters used in command line will overwrite those defined in the config files and that some parameters are mandatory in command line (like the output spaces).
+
+MRIQC is ran both on a subject-session and group level. However, the group level MRIQC expects the folder containing all the MRIQC derivatives from subject-session level jobs, overwise, it will return a "no data found" error.
+
+**File system**
+Data must be organized according to the BIDS format (https://bids.neuroimaging.io/index.html). The derivatives are also organized according to the BIDS derivatives specification. An example of the expected file structure is given below:
 
 dataset/
 ├─ derivatives/
