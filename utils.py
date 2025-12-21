@@ -1,7 +1,9 @@
 import toml
 import os
 import subprocess
+import re
 from pathlib import Path
+from datetime import datetime
 
 
 def load_config(config_file):
@@ -194,7 +196,7 @@ def read_log(config, subject, session, runtype="qsiprep"):
     finished_status = "Error"
     runtime = 0
 
-    DERIVATIVES_DIR = config.config["common"]["derivatives"]
+    DERIVATIVES_DIR = config["common"]["derivatives"]
     stdout_dir = f"{DERIVATIVES_DIR}/{runtype}/stdout"
 
     # Check that QSIprep finished without error

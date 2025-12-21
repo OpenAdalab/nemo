@@ -8,7 +8,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from config import config
+import config
 from rsfmri.qc_fmriprep_metrics_extractions import run as extract_qc_metrics
 import utils
 
@@ -140,8 +140,8 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
     singularity_cmd = (
             f'\napptainer run \\\n'
             f'    --cleanenv \\\n'
-            f'-B /scratch/hrasoanandrianina/code/nemo:/project \\\n'
-            f'--env PYTHONPATH=/project \\\n'
+            f'    -B /scratch/hrasoanandrianina/code/nemo:/project \\\n'
+            f'    --env PYTHONPATH=/project \\\n'
             f'    -B {input_dir}:/data:ro \\\n'
             f'    -B {DERIVATIVES_DIR}/qc/fmriprep/outputs:/out \\\n'
             f'    -B {mriqc["bids_filter_dir"]}:/bids_filter_dir \\\n'
