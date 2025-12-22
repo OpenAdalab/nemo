@@ -130,6 +130,7 @@ def run(config, subject, session):
                 # Load data
                 t1w_img = load_any_image(t1w)
                 t1w_mask_img = load_any_image(t1w_mask)
+                t1w_mask = t1w_mask_img.get_fdata() > 0
                 bold_img = load_any_image(bold)
 
                 # Compute mean BOLD image
@@ -171,14 +172,16 @@ def run(config, subject, session):
                     Processing_time_hours=runtime,
                     Number_of_folders_generated=dir_count,
                     Number_of_files_generated=file_count,
-                    brain_voxels=voxel_count(brain_mask),
+                    t1w_shape = t1w_mask_img.shape,
+                    brain_voxels_t1w = voxel_count(t1w_mask_img),
+                    brain_voxels_bold=voxel_count(brain_mask),
+                    background_voxels_bold = voxel_count(bg_mask),
+                    bold_shape = bold_img.shape,
                     gm_voxels=voxel_count(gm_mask),
                     wm_voxels=voxel_count(wm_mask),
                     csf_voxels=voxel_count(csf_mask),
                     MI_T1w_BOLD=mutual_information(t1w_brain, bold_brain),
                 )
-
-
 
     except Exception as e:
                 print(f"⚠️ Skipping {subject} {session}: {e}")

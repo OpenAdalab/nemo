@@ -152,19 +152,16 @@ def submit_job(cmd):
 
 def count_dirs(directory):
     """
-    Count the number of directories in a given directory (non-recursively)
-
+    Count the number of directories recursively inside the given directory
     """
-    if os.path.isdir(directory):
-        return sum([1 for item in os.listdir(directory) if os.path.isdir(os.path.join(directory, item))])
-    else:
+    if not os.path.isdir(directory):
         return 0
+    return sum(len(dirs) for _, dirs, _ in os.walk(directory))
 
 
 def count_files(directory):
     """
-    Count the number of files in a given directory
-
+    Count the number of files recursively inside the given directory
     """
     if os.path.isdir(directory):
         return sum([len(files) for _, _, files in os.walk(directory)])
