@@ -1,3 +1,5 @@
+from datetime import datetime
+import re
 import toml
 import os
 import subprocess
@@ -33,8 +35,9 @@ def get_subjects(input_dir, specified_subjects=None):
     if specified_subjects:
         return [f"sub-{sub}" if not sub.startswith("sub-") else sub for sub in specified_subjects]
 
-    return sorted(d for d in os.listdir(input_dir) if d.startswith("sub-") and os.path.isdir(os.path.join(input_dir, d)))
-    
+    return sorted(
+        d for d in os.listdir(input_dir) if d.startswith("sub-") and os.path.isdir(os.path.join(input_dir, d)))
+
 
 def get_sessions(input_dir, subject, specified_sessions=None):
     """
@@ -56,9 +59,10 @@ def get_sessions(input_dir, subject, specified_sessions=None):
     """
     subject_path = os.path.join(input_dir, subject)
     if specified_sessions:
-        return [f"{ses}" if not ses.startswith("ses-") else ses for ses in specified_sessions]
+        return [f"ses-{ses}" if not ses.startswith("ses-") else ses for ses in specified_sessions]
 
-    return sorted(d for d in os.listdir(subject_path) if d.startswith("ses-") and os.path.isdir(os.path.join(subject_path, d)))
+    return sorted(
+        d for d in os.listdir(subject_path) if d.startswith("ses-") and os.path.isdir(os.path.join(subject_path, d)))
 
 
 def subject_exists(input_dir, subject):
@@ -83,7 +87,7 @@ def has_anat(input_dir, subject):
     :return: Description
     
     """
-    return any((Path(input_dir)/subject).glob("**/anat/*T1w.nii*"))
+    return any((Path(input_dir) / subject).glob("**/anat/*T1w.nii*"))
 
 
 def has_dwi(input_dir, subject):
@@ -95,7 +99,7 @@ def has_dwi(input_dir, subject):
     :return: Description
     
     """
-    return any((Path(input_dir)/subject).glob("**/dwi/*dwi.nii*"))
+    return any((Path(input_dir) / subject).glob("**/dwi/*dwi.nii*"))
 
 
 def has_func_fmap(input_dir, subject):
@@ -107,7 +111,8 @@ def has_func_fmap(input_dir, subject):
     :return: Description
     
     """
-    return any((Path(input_dir)/subject).glob("**/func/*bold.nii*")) and any((Path(input_dir)/subject).glob("**/fmap/*"))
+    return any((Path(input_dir) / subject).glob("**/func/*bold.nii*")) and any(
+        (Path(input_dir) / subject).glob("**/fmap/*"))
 
 
 def submit_job(cmd):
@@ -168,6 +173,7 @@ def count_files(directory):
     else:
         return 0
 
+
 def extract_runtime(content):
     # Expression régulière pour capturer les timestamps
     timestamp_pattern = r"\d{6}-\d{2}:\d{2}:\d{2}"
@@ -196,7 +202,7 @@ def read_log(config, subject, session, runtype):
     DERIVATIVES_DIR = config["common"]["derivatives"]
     stdout_dir = f"{DERIVATIVES_DIR}/{runtype}/stdout"
 
-    # Check that QSIprep finished without error
+    # Check that 'runtype' finished without error
     if not os.path.exists(stdout_dir):
         return finished_status, runtime
 
@@ -205,16 +211,18 @@ def read_log(config, subject, session, runtype):
     if not stdout_files:
         return finished_status, runtime
 
-    if [{runtype} == "fmriprep"]:
-        success_string="fMRIPrep finished successfully"
-    elif [{runtype} == "xcpd"]:
-        success_string="XCP-D finished successfully"
-    elif [{runtype} == "qsiprep"]:
-        success_string="QSIPrep finished successfully"
-    elif [{runtype} == "qsirecon"]:
-        success_string="QSIRecon finished successfully"
-    elif [{runtype} == "mriqc"]:
-        success_string="MRIQC finished successfully"
+    if runtype == "fmriprep":
+        success_string = "fMRIPrep finished successfully"
+    elif runtype == "xcpd":
+        success_string = "XCP-D finished successfully"
+    elif runtype == "qsiprep":
+        success_string = "QSIPrep finished successfully"
+    elif runtype == "qsirecon":
+        success_string = "QSIRecon finished successfully"
+    elif runtype == "mriqc":
+        success_string = "MRIQC finished successfully"
+    else:
+        success_string = 'finished successfully'
 
     for file in stdout_files:
         file_path = os.path.join(stdout_dir, file)

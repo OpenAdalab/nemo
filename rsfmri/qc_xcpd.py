@@ -10,7 +10,6 @@ sys.path.insert(0, str(PROJECT_ROOT))
 import numpy as np
 import pandas as pd
 from pathlib import Path
-import nibabel as nb
 import utils
 
 from rsfmri.qc_xcpd_metrics_extractions import run as extract_qc_metrics
@@ -160,6 +159,7 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         f'    --no-sub --notrack\n'
     )
 
+    # todo: mettre les fonctions dans ce script ou dans un script qc ou metrics
     python_command = (
     f'\necho "Running QC metrics extraction"\n'
     f'python3 rsfmri/qc_xcpd_metrics_extractions.py '
@@ -180,6 +180,7 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
     with open(path_to_script, 'w') as f:
         f.write(header + module_export + prereq_check + tmp_dir_setup + singularity_cmd + python_command + save_work)
     print(f"Created MRIQC-XCP-D SLURM job: {path_to_script} for subject: {subject}, session: {session}")
+
 
 def run_qc_xcpd(config, subject, session, job_ids=None):
     """

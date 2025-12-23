@@ -13,7 +13,7 @@ track_carbon = false
 me_output_echos = false
 aggr_ses_reports = 4
 output_layout = "bids"
-output_spaces = "fsLR:den-32k T1w fsaverage:den-164k MNI152NLin6Asym:res-native"
+#output_spaces = "fsLR:den-32k T1w fsaverage:den-164k MNI152NLin6Asym:res-native"  # to set in command line
 reports_only = false
 write_graph = false
 
@@ -21,10 +21,10 @@ write_graph = false
 anat_only = false
 bold2anat_dof = 6
 bold2anat_init = "auto"
-cifti_output = "91k"
 fmap_bspline = false
 force_syn = false
 hires = true
+#fs_no_reconall  # if set true, will disable downstream surface level steps, like boundary based registration
 fs_no_resume = false
 ignore = [ "slicetiming",]
 force = []

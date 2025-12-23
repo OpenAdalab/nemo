@@ -2,13 +2,8 @@
 import os
 import sys
 from pathlib import Path
-from config import config
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 import utils
-#from rsfmri.run_fmriprep import  check_prerequisites
-#from rsfmri.run_xcpd import is_already_processed as is_xcpd_done
-#from dwi.run_qsiprep import is_already_processed as is_qsiprep_done
-#from dwi.run_qsirecon import is_already_processed as is_qsirecon_done
 
 
 # --------------------------------------------
@@ -98,9 +93,9 @@ def derivatives_datatype_exists(config, subject, session, data_type="raw"):
 
 
 # ------------------------
-# Create SLURM job script for MRIQC 
+# Create SLURM job script for MRIQC
 # ------------------------
-def generate_slurm_mriqc_script(config, subject, session, path_to_script, data_type="raw", job_ids=None):
+def generate_slurm_script(config, subject, session, path_to_script, data_type="raw", job_ids=None):
     """Generate the SLURM job script.
     Parameters
     ----------
@@ -123,17 +118,15 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, data_t
     header = (
         f'#!/bin/bash\n'
         f'#SBATCH --job-name=mriqc_{data_type}_{subject}_{session}\n'
-        f'#SBATCH --output={DERIVATIVES_DIR}/mriqc_{data_type}/stdout/mriqc_{data_type}_{subject}_{session}_%j.out\n'
-        f'#SBATCH --error={DERIVATIVES_DIR}/mriqc_{data_type}/stdout/mriqc_{data_type}_{subject}_{session}_%j.err\n'
+        f'#SBATCH --output={DERIVATIVES_DIR}/qc/{data_type}/stdout/mriqc_{data_type}_{subject}_{session}_%j.out\n'
+        f'#SBATCH --error={DERIVATIVES_DIR}/qc/{data_type}/stdout/mriqc_{data_type}_{subject}_{session}_%j.err\n'
         f'#SBATCH --mem={mriqc["requested_mem"]}\n'
         f'#SBATCH --time={mriqc["requested_time"]}\n'
         f'#SBATCH --partition={mriqc["partition"]}\n'
     )
 
     if job_ids:
-        header += (
-            f'#SBATCH --dependency=afterok:{":".join(job_ids)}\n'
-        )
+        header += f'#SBATCH --dependency=afterok:{":".join(job_ids)}\n'
 
     if common.get("email"):
         header += (
@@ -148,25 +141,6 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, data_t
         f'\nmodule purge\n'
         f'module load userspace/all\n'
         f'module load singularity\n'
-
-        f'echo "------ Running {mriqc["mriqc_container"]} for subject: {subject}, session: {session} --------"\n'
-    )
-
-    tmp_dir_setup = (
-        f'\nhostname\n'
-        f'# Choose writable scratch directory\n'
-        f'if [ -n "$SLURM_TMPDIR" ]; then\n'
-        f'    TMP_WORK_DIR="$SLURM_TMPDIR"\n'
-        f'elif [ -n "$TMPDIR" ]; then\n'
-        f'    TMP_WORK_DIR="$TMPDIR"\n'
-        f'else\n'
-        f'    TMP_WORK_DIR=$(mktemp -d /tmp/mriqc_{subject}_{session})\n'
-        f'fi\n'
-
-        f'mkdir -p $TMP_WORK_DIR\n'
-        f'chmod -Rf 771 $TMP_WORK_DIR\n'
-        f'echo "Using TMP_WORK_DIR = $TMP_WORK_DIR"\n'
-        f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/mriqc_{data_type}"\n'
     )
 
     prereq_check = (
@@ -198,34 +172,34 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, data_t
         f'    echo "[MRIQC] {data_type} did not terminate for {subject} {session}. Please run {data_type} command before."\n '
         f'    exit 1\n'
         f'fi\n'
-    
+
     )
 
     # Define the Singularity command for running MRIQC
     # Note: Unlike fmriprep, no config file is used here, the option doesn't exist for mriqc
     if data_type == "raw":
-        input_dir = common["input_dir"]
+        MRIQC_INPUT = BIDS_DIR
     else:
-        input_dir = f"{DERIVATIVES_DIR}/{data_type}/outputs"
+        MRIQC_INPUT = f"{DERIVATIVES_DIR}/{data_type}/outputs"
 
     singularity_cmd = (
-            f'\napptainer run \\\n'
-            f'    --cleanenv \\\n'
-            f'    -B {input_dir}:/data:ro \\\n'
-            f'    -B {DERIVATIVES_DIR}/mriqc_{data_type}/outputs:/out \\\n'
-            f'    -B {mriqc["bids_filter_dir"]}:/bids_filter_dir \\\n'
-            f'    {mriqc["mriqc_container"]} /data /out participant \\\n'
-            f'    --participant_label {subject} \\\n'
-            f'    --session-id {session} \\\n'
-            f'    --bids-filter-file /bids_filter_dir/bids_filter_{session}.json \\\n'
-            f'    --mem {mriqc["requested_mem"]} \\\n'
-            f'    -w $TMP_WORK_DIR \\\n'
-            f'    --fd_thres 0.5 \\\n'
-            f'    --verbose-reports \\\n'
-            f'    --verbose \\\n'
-            f'    --no-sub --notrack\n'
-        )
-    
+        f'\napptainer run \\\n'
+        f'    --cleanenv \\\n'
+        f'    -B {MRIQC_INPUT}:/data:ro \\\n'
+        f'    -B {DERIVATIVES_DIR}/qc/{data_type}/outputs:/out \\\n'
+        f'    -B {mriqc["bids_filter_dir"]}:/bids_filter_dir \\\n'
+        f'    {mriqc["mriqc_container"]} /data /out participant \\\n'
+        f'    --participant_label {subject} \\\n'
+        f'    --session-id {session} \\\n'
+        f'    --bids-filter-file /bids_filter_dir/bids_filter_{session}.json \\\n'
+        f'    --mem {mriqc["requested_mem"]} \\\n'
+        f'    -w /out/work \\\n'
+        f'    --fd_thres 0.5 \\\n'
+        f'    --verbose-reports \\\n'
+        f'    --verbose \\\n'
+        f'    --no-sub --notrack\n'
+    )
+
     save_work = (
         f'\necho "Cleaning up temporary work directory..."\n'
         f'\nchmod -Rf 771 {DERIVATIVES_DIR}/mriqc_{data_type}\n'
@@ -236,11 +210,11 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, data_t
     # Write the complete SLURM script to the specified file
     if data_type == "raw":
         with open(path_to_script, 'w') as f:
-            f.write(header + module_export + tmp_dir_setup + singularity_cmd + save_work)
+            f.write(header + module_export + singularity_cmd + save_work)
     else:
         with open(path_to_script, 'w') as f:
-            f.write(header + module_export + prereq_check + tmp_dir_setup + singularity_cmd + save_work)
-    print(f"Created MRIQC SLURM job: {path_to_script} for subject {subject}, session {session}")
+            f.write(header + module_export + prereq_check + singularity_cmd + save_work)
+
 
 # ------------------------------
 # MAIN JOB SUBMISSION LOGIC
@@ -260,29 +234,27 @@ def run_mriqc(config, subject, session, data_type="raw", job_ids=None):
         List of SLURM job IDs to set as dependencies (default is None).
     """
 
-    DERIVATIVES_DIR = config["common"]["derivatives"]
-
     if data_type not in ["raw", "fmriprep", "xcpd", "qsiprep", "qsirecon"]:
         print(f"Invalid data_type: {data_type}. Must be 'raw', 'fmriprep', or 'qsiprep'.")
         return None
-    
-    # Create output (derivatives) directories
-    os.makedirs(f"{DERIVATIVES_DIR}/mriqc_{data_type}", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/mriqc_{data_type}/outputs", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/mriqc_{data_type}/stdout", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/mriqc_{data_type}/scripts", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/mriqc_{data_type}/work", exist_ok=True)
 
-    if is_already_processed(config, subject, session):
-        print(f"[MRIQC] Subject {subject}_{session} already processed. Skipping MRIQC submission.\n")
+    DERIVATIVES_DIR = config["common"]["derivatives"]
+    mriqc = config["mriqc"]
+
+    if is_already_processed(config, subject, session, data_type) and mriqc["skip_processed"]:
         return None
 
-    else:
-        # Add dependency if this is not the first job in the chain
-        path_to_script = f"{DERIVATIVES_DIR}/mriqc_{data_type}/scripts/{subject}_{session}_mriqc.slurm"
-        generate_slurm_mriqc_script(config, subject, session, path_to_script, data_type=data_type, job_ids=job_ids)
+    # Create output (derivatives) directories
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/{data_type}", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/{data_type}/outputs", exist_ok=True) # todo: change outputs to mriqc ?
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/{data_type}/stdout", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/{data_type}/scripts", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/{data_type}/work", exist_ok=True)
 
-        cmd = f"sbatch {path_to_script}"
-        job_id = utils.submit_job(cmd)
-        print(f"[MRIQC] Submitting job {cmd}\n")
-        return job_id
+    # Add dependency if this is not the first job in the chain
+    path_to_script = f"{DERIVATIVES_DIR}/qc/{data_type}/scripts/{subject}_{session}_mriqc.slurm"
+    generate_slurm_script(config, subject, session, path_to_script, data_type=data_type, job_ids=job_ids)
+
+    cmd = f"sbatch {path_to_script}"
+    job_id = utils.submit_job(cmd)
+    return job_id

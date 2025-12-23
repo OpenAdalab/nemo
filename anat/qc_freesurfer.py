@@ -3,7 +3,6 @@ import os
 import pandas as pd
 from pathlib import Path
 import sys
-
 sys.path.append(str(Path(__file__).resolve().parent))
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from _outlierDetection import outlierDetection_normalized, outlierTable, readAsegStats
@@ -11,7 +10,6 @@ import utils
 import re
 import csv
 import numpy as np
-# import fsqc
 
 
 def read_log(log_file):

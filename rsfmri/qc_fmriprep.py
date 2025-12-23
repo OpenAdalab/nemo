@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import warnings
 import os
 import sys
@@ -11,9 +10,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 import config
 from rsfmri.qc_fmriprep_metrics_extractions import run as extract_qc_metrics
 import utils
-
 warnings.filterwarnings("ignore")
-# -----------------------
+
 
 # ------------------------
 # Create SLURM job script for MRIQC 
@@ -163,12 +161,6 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         )
     
     # Call to python scripts for the rest of QC
-    # python_command = (
-    #     f'\necho "running the qc_fmriprep_metrics_extraction.py script" \n'
-    #     f'\npython3 rsfmri/qc_fmriprep_metrics_extractions.py {config} {subject} {session}\n'
-    #     f'\necho "Python script execution done" \n'
-    #             )
-    
     python_command = (
     f'\necho "Running QC metrics extraction"\n'
     f'python3 rsfmri/qc_fmriprep_metrics_extractions.py '

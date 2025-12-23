@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 from venv import logger
 import numpy as np
 import nibabel as nib
@@ -11,12 +10,11 @@ import warnings
 import os
 import toml
 import utils
-from config import config
-
 warnings.filterwarnings("ignore")
 # -----------------------
 
-def load_any_image(path: Path):
+
+def load_any_image(path: Path) -> np.ndarray:
     """
     Load an fMRIPrep/XCP-D output image, handling both NIfTI and GIFTI formats.
     

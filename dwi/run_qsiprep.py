@@ -100,9 +100,9 @@ def generate_slurm_script(config, subject, session, path_to_script, job_ids=None
         f'module load singularity\n'
     )
 
-
     # Note: Temporary binding to a local FreeSurfer version is included
-    # todo: After PR Update FreeSurfer #19 accepted and new container built, remove bound to local freesurfer 7.4.1 and env variable
+    # todo: Once the PR#19 Update FreeSurfer is accepted and new container version is built,
+    #  remove bound to local freesurfer 7.4.1 (-B) and env variable (--env)
     singularity_command = (
         f'\napptainer run \\\n'
         f'    --nv --cleanenv --writable-tmpfs \\\n'
@@ -113,7 +113,7 @@ def generate_slurm_script(config, subject, session, path_to_script, job_ids=None
         f'    -B {qsiprep["qsiprep_config"]}:/config/qsiprep_config.toml \\\n'
         f'    -B /scratch/lhashimoto/freesurfer-7.4.1/usr/local/freesurfer:/opt/freesurfer:ro \\\n'
         f'    --env FREESURFER_HOME=/opt/freesurfer \\\n'
-        f'    {qsiprep["qsiprep_container"]} /data /out participant \\\n'
+        f'    {qsiprep["qsiprep_container"]} /data /out/outputs participant \\\n'
         f'    --participant-label {subject} --session-id {session} \\\n'
         f'    --skip-bids-validation -v -w /out/work \\\n'
         f'    --bids-database-dir /out/work/bids_db_dir \\\n'
@@ -152,18 +152,18 @@ def run_qsiprep(config, subject, session, job_ids=None):
     # QSIprep manages already processed subjects.
     # No need to remove existing folder or skip subjects.
     # Required files are checked inside the process.
-    if is_already_processed(config, subject, session):
-        return None
 
     DERIVATIVES_DIR = config["common"]["derivatives"]
+    qsiprep = config["qsiprep"]
 
-    if job_ids is None:
-        job_ids = []
+    if is_already_processed(config, subject, session) and qsiprep["skip_processed"]:
+        return None
 
     # Create output (derivatives) directories
     os.makedirs(f"{DERIVATIVES_DIR}/qsiprep", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qsiprep/stdout", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qsiprep/scripts", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qsiprep/outputs", exist_ok=True)
 
     path_to_script = f"{DERIVATIVES_DIR}/qsiprep/scripts/{subject}_{session}_qsiprep.slurm"
     generate_slurm_script(config, subject, session, path_to_script, job_ids)

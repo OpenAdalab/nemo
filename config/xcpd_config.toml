@@ -15,7 +15,7 @@ reports_only = false
 write_graph = false
 
 [workflow]
-mode = "linc"
+#mode = "linc"
 file_format = "auto" # Possible choices: auto, nifti, cifti
 dummy_scans = "auto"
 input_type = "fmriprep"

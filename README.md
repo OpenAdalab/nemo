@@ -1,76 +1,133 @@
 # nemo
 
-MR data analyses for bipolar disorder
 
-This repository is dedicated to launch pre- and post-processing workflows on MR data acquired with the following MR protocol:
-- T1w (1.0x1.0x1.0 mm3)
-- T2w (1.0x1.0x1.0 mm3)
-- DWI_PA_109vol (1.8x1.8x1.8 mm3)
-- DWI_AP_109vol (1.8x1.8x1.8 mm3)
-- rs-FMRI + fieldmap
+The `nemo` repository is designed to facilitate the pre- and post-processing of MR imaging data. It supports workflows for anatomical, diffusion, and functional MRI data, leveraging widely used neuroimaging tools and adhering to the BIDS (Brain Imaging Data Structure) format.
 
-Data are considered as non-longitudinal.
+## Supported MR Protocols
+The repository is tailored for MR data acquired with the following sequences:
+- T1-weighted (1.0x1.0x1.0 mm³)
+- T2-weighted (1.0x1.0x1.0 mm³)
+- Diffusion-weighted imaging (DWI) with AP/PA phase encoding (1.8x1.8x1.8 mm³, 109 volumes)
+- Resting-state functional MRI (rs-fMRI)
+- B0 Fieldmaps
+
+Data are considered as cross-sectional.\
 Multiple sessions are possible.
 
+## Repository Features
+- **Anatomical Processing**: Segmentation using FreeSurfer.
+- **Diffusion Processing**: Structural connectome estimation using QSIprep and QSIrecon.
+- **Functional Processing**: Functional connectome estimation using fMRIPrep and XCP-D.
+- **Quality Control (QC)**: Automated QC pipelines for each processing step.
 
-**File system**
-Data must be organized according to the BIDS format (https://bids.neuroimaging.io/index.html)
-dataset/
-├─ sub-01/
-│  ├─ ses-01/
-│  │  ├─ anat/
-│  │  │  ├─sub-01_ses-01_T1w.nii.gz
-│  │  │  ├─sub-01_ses-01_T2w.nii.gz
-│  │  ├─ dwi/
-│  │  │  ├─sub-01_ses-01_dir-AP_run-01_dwi.nii.gz
-│  │  │  ├─sub-01_ses-01_dir-AP_run-01_dwi.bval
-│  │  │  ├─sub-01_ses-01_dir-AP_run-01_dwi.bvec
-│  │  │  ├─sub-01_ses-01_dir-PA_run-01_dwi.nii.gz
-│  │  │  ├─sub-01_ses-01_dir-PA_run-01_dwi.bval
-│  │  │  └─sub-01_ses-01_dir-PA_run-01_dwi.bvec
-│  │  ├─ fmap/
-│  │  │  ├─sub-01_ses-01_dir-AP_epi.nii.gz
-│  │  │  └─sub-01_ses-01_dir-PA_epi.nii.gz
-│  │  └─ func/
-│  │  │  ├─sub-01_ses-01_task-rest_bold.nii.gz
-│  │  │  └─sub-01_ses-01_task-rest_sbref.nii.gz
+## Prerequisites
+### Software Requirements
+- **Python**: Version 3.12 with the following libraries:
+  - `toml`
+  - `pandas`
+  - `numpy`
+  - `nibabel`
+  - `scipy`
+- **Singularity Containers**:
+  - FreeSurfer 7.4.1
+  - fsqc 2.1.4
+  - QSIprep 1.0.2
+  - QSIrecon 1.1.1
+  - fMRIPrep 25.2.2 (or 25.2.0 lts)
+  - XCP-D 0.12.0
+  - MRIQC 24.0.2
 
-**Workflows**
-- (anat) Anatomical Segmentation using FreeSurfer
-- (anat) Sulcal Pits Extraction using Slam
-- (dwi) Structural Connectome Estimation using QSIprep
-- (func) Functional Connectome Estimation using FMRIprep and XCP-D
+### Data Organization
+Raw data must follow the BIDS format. Example structure:
+```
+dataset/\
+├─ sub-01/\
+│  ├─ ses-01/\
+│  │  ├─ anat/\
+│  │  │  ├─sub-01_ses-01_T1w.nii.gz\
+│  │  │  ├─sub-01_ses-01_T2w.nii.gz\
+│  │  ├─ dwi/\
+│  │  │  ├─sub-01_ses-01_dir-AP_run-01_dwi.nii.gz\
+│  │  │  ├─sub-01_ses-01_dir-AP_run-01_dwi.bval\
+│  │  │  ├─sub-01_ses-01_dir-AP_run-01_dwi.bvec\
+│  │  │  ├─sub-01_ses-01_dir-PA_run-01_dwi.nii.gz\
+│  │  │  ├─sub-01_ses-01_dir-PA_run-01_dwi.bval\
+│  │  │  └─sub-01_ses-01_dir-PA_run-01_dwi.bvec\
+│  │  ├─ fmap/\
+│  │  │  ├─sub-01_ses-01_dir-AP_epi.nii.gz\
+│  │  │  └─sub-01_ses-01_dir-PA_epi.nii.gz\
+│  │  └─ func/\
+│  │  │  ├─sub-01_ses-01_task-rest_bold.nii.gz\
+│  │  │  └─sub-01_ses-01_task-rest_sbref.nii.gz\
+```
 
-**Prerequisites**
-BIDS version : 1.8.0
-Python 3.12
-toml
-FreeSurfer 7.4.1 (singularity container)
-QSIprep 1.0.2 (singularity container)
-QSIrecon 1.1.1 (singularity container)
-FMRIprep
-XCP-D
+## Configuration
+The repository uses a centralized configuration file (`config/config.toml`) to define:
+- Paths to input/output directories.
+- List of subjects and sessions to process.
+- Workflow steps to execute.
+- SLURM job parameters for each container.
 
-Please make sure to adapt the paths in the config.py file to your own disk configuration before using one of these scripts !
+## Usage
+1. **Prepare the Configuration File**:
+   - Update `config/config.toml` with the appropriate paths, subjects, sessions, slurm options and workflow options.
+   Note that some arguments are set in this file that cannot be set into the container-specific configuration files.
+   - Review and customize the container-specific configuration files in the `config/` directory if needed.
+   Note that suggested arguments have been adapted to the MR protocol defined above. 
+   Make sure to keep the original copy of the default config files.
 
-## User-guide
-The pipelines take as arguments the dataset BIDS directory, the output BIDS derivative directory and a list of subjects.
-They can be launch either in interactive or batch mode.
+2. **Activate the Python Environment**:
+   ```bash
+   module load userspace/all
+   module load python3/3.12.0
+   source /path/to/your/python/virtual/env/bin/activate
+   ```
+3. Run the workflow: 
+```
+python3 run_workflow.py --config /path/to/your/config.toml
+```
+The workflow will submit jobs to the SLURM scheduler, 
+processing each step in batch mode (except for the Freesurfer QC which runs 
+in interactive mode as a background task).\
+The configuration is automatically saved with datetime.\
+Scripts are generated and saved for each subject/session.\
+Steps are scheduled according to a predefined order, 
+and dependencies between steps are managed automatically by SLURM to ensure proper execution.\
+At the beginning of each step a sanity check verifies that the previous step terminated successfully.
 
-To set all other arguments, the easiest way is to use config files. For each pipeline, several config files can be found 
-that you can choose depending on your objectives. These configurations have been adapted to the MR protocol defined above. 
-Or you can create your one config file with custom parameters.
+## Outputs
+Processed data will be saved in the derivatives/ directory, organized by pipeline:
+```
+derivatives/
+├─ freesurfer/
+├─ qsiprep/
+├─ qsirecon/
+├─ fmriprep/
+├─ xcpd/
+└─ qc/
+```
+Intermediate files are saved in a 'work' directory. This folder can be deleted manually to save disk space.
+
+## Notes
 
 Some tips and explanations can be found bellow.
-However, for more details about each pipeline, please visit the corresponding websites.
+However, for more details about each pipeline, refer to their respective documentation:
+- [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/)
+- [fsqc](https://github.com/Deep-MI/fsqc)
+- [QSIprep](https://qsiprep.readthedocs.io/)
+- [QSIrecon](https://qsirecon.readthedocs.io/)
+- [fMRIPrep](https://fmriprep.org/)
+- [XCP-D](https://xcp-d.readthedocs.io/)
+- [MRIQC](https://mriqc.readthedocs.io/)
 
-## anat
+
+### anat
 Choice has been made to use "recon-all" for anatomical segmentation. The reason is that results have been proven 
 to be of good quality in many studies, while CNN-versions of FastSurfer are quite new.
 Also, this historical algorithm uses the T2 contrast to improve white and pial surface reconstruction, which can be 
 crucial on infant data.
 
-## dwi
+### dwi
 Runtime is hardly predictable, as several jobs are ran in parallel. Each job starts as soon as previous jobs are 
 finished and the individual runtime depends on the number of available processors at that moment.
 
@@ -158,3 +215,4 @@ project/
 │   ├── xcpd/
 │   └── qc/
 └── main_workflow.py               # Script principal pour exécuter tout le workflow
+```

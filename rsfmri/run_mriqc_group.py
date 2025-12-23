@@ -2,7 +2,6 @@
 import os
 import sys
 from pathlib import Path
-
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 import utils
 
@@ -30,6 +29,7 @@ def is_already_processed(config, input_dir, data_type="raw"):
     DERIVATIVES_DIR = config["common"]["derivatives"]
 
     # Check if mriqc already processed without error
+    # todo : remonter dans le main()
     if data_type not in ["raw", "fmriprep", "xcp_d", "qsiprep", "qsirecon"]:
         raise ValueError(f"Invalid data_type: {data_type}. Must be 'raw', 'fmriprep', or 'qsiprep'.")
 
@@ -172,18 +172,15 @@ def run_mriqc_group(config, input_dir, data_type="raw", job_ids=None):
 
     DERIVATIVES_DIR = config["common"]["derivatives"]
 
+    if is_already_processed(config, input_dir):
+        return None
+
     # Create output (derivatives) directories
     os.makedirs(f"{DERIVATIVES_DIR}/group_mriqc_{data_type}", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/outputs", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/stdout", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/scripts", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/work", exist_ok=True)
-
-    if job_ids is None:
-        job_ids = []
-
-    if is_already_processed(config, input_dir):
-        return None
 
     # Add dependency if this is not the first job in the chain
     path_to_script = f"{DERIVATIVES_DIR}/group_mriqc_{data_type}/scripts/group_mriqc_{data_type}.slurm"
