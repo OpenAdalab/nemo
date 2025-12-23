@@ -46,8 +46,14 @@ def voxel_count(mask):
     """
     Extract voxel count from a mask (binary or multiclass).
     
-    :param mask: array data
-    :return: number of True voxels
+    Parameters
+    ----------
+    mask : np.ndarray
+        Mask array data.
+    Returns
+    -------
+    int
+        Number of True voxels.
     """
 
     return np.sum(mask)
@@ -57,10 +63,17 @@ def dice(a, b):
     """
     Compute dice similarity coefficient between two binary masks.
     
-    :param a: array data
-    :param b: array data
+    Parameters
+    ----------
+    a : np.ndarray
+        First binary mask array.
+    b : np.ndarray
+        Second binary mask array.
 
-    :return: Dice similarity coefficient
+    Returns
+    -------
+    float
+        Dice similarity coefficient.
     """
     a = a.astype(bool)
     b = b.astype(bool)
@@ -72,10 +85,18 @@ def mutual_information(img1, img2, bins=64):
     """
     Compute mutual information between two images.
     
-    :param img1: array data
-    :param img2: array data
-    :param bins: number of bins for histogram
-    :return: Mutual information score
+    Parameters
+    ----------
+    img1 : np.ndarray
+        First image data array.
+    img2 : np.ndarray
+        Second image data array.
+    bins : int, optional
+        Number of bins for histogram (default is 64).
+    Returns
+    -------
+    float
+        Mutual information score.
     """
     i1 = img1.flatten()
     i2 = img2.flatten()

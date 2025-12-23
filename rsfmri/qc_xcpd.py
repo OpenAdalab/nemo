@@ -186,7 +186,7 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
 
 def run_qc_xcpd(config, subject, session, job_ids=None):
     """
-    Run QC and MRQC on XCP-D outputs for a given subject and session.
+    Run QC and MRIQC on XCP-D outputs for a given subject and session.
 
     Parameters
     ----------

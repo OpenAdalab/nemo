@@ -16,13 +16,6 @@ MAX_CENSOR_PCT = 50.0 # Maximum percentage of censored volumes
 MAX_MEAN_FD = 0.5 # Maximum mean framewise displacement
 
 # ------------------------------
-# CONFIG / THRESHOLDS
-# ------------------------------
-MIN_RETAINED_VOLS = 100 # Minimum number of volumes to retain after censoring
-MAX_CENSOR_PCT = 50.0 # Maximum percentage of censored volumes
-MAX_MEAN_FD = 0.5 # Maximum mean framewise displacement
-
-# ------------------------------
 # HELPERS
 # ------------------------------
 def load_if_exists(path):
