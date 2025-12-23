@@ -98,22 +98,22 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         f'echo "------ Running {mriqc["mriqc_container"]} for subject: {subject}, session: {session} --------"\n'
     )
 
-    tmp_dir_setup = (
-        f'\nhostname\n'
-        f'# Choose writable scratch directory\n'
-        f'if [ -n "$SLURM_TMPDIR" ]; then\n'
-        f'    TMP_WORK_DIR="$SLURM_TMPDIR"\n'
-        f'elif [ -n "$TMPDIR" ]; then\n'
-        f'    TMP_WORK_DIR="$TMPDIR"\n'
-        f'else\n'
-        f'    TMP_WORK_DIR=$(mktemp -d /tmp/qc_fmriprep_{subject}_{session})\n'
-        f'fi\n'
+    # tmp_dir_setup = (
+    #     f'\nhostname\n'
+    #     f'# Choose writable scratch directory\n'
+    #     f'if [ -n "$SLURM_TMPDIR" ]; then\n'
+    #     f'    TMP_WORK_DIR="$SLURM_TMPDIR"\n'
+    #     f'elif [ -n "$TMPDIR" ]; then\n'
+    #     f'    TMP_WORK_DIR="$TMPDIR"\n'
+    #     f'else\n'
+    #     f'    TMP_WORK_DIR=$(mktemp -d /tmp/qc_fmriprep_{subject}_{session})\n'
+    #     f'fi\n'
 
-        f'mkdir -p $TMP_WORK_DIR\n'
-        f'chmod -Rf 771 $TMP_WORK_DIR\n'
-        f'echo "Using TMP_WORK_DIR = $TMP_WORK_DIR"\n'
-        f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/qc/fmriprep"\n'
-    )
+    #     f'mkdir -p $TMP_WORK_DIR\n'
+    #     f'chmod -Rf 771 $TMP_WORK_DIR\n'
+    #     f'echo "Using TMP_WORK_DIR = $TMP_WORK_DIR"\n'
+    #     f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/qc/fmriprep"\n'
+    # )
    
     prereq_check = (
         f'\n# Check that FMRIPREP outputs exists\n'
@@ -153,7 +153,7 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
             f'    --session-id {session} \\\n'
             f'    --bids-filter-file /bids_filter_dir/bids_filter_{session}.json \\\n'
             f'    --mem {mriqc["requested_mem"]} \\\n'
-            f'    -w $TMP_WORK_DIR \\\n'
+            f'    -w /out/work \\\n'
             f'    --fd_thres 0.5 \\\n'
             f'    --verbose-reports \\\n'
             f'    --verbose \\\n'
