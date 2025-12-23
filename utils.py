@@ -188,7 +188,7 @@ def extract_runtime(content):
     return runtime
 
 
-def read_log(config, subject, session, runtype="qsiprep"):
+def read_log(config, subject, session, runtype):
 
     finished_status = "Error"
     runtime = 0

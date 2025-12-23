@@ -83,7 +83,11 @@ Sequence filtering : keep only resting state fMRI tasks for the processing. Make
 
 A few additional parameters have been set in the config files. Beware that the parameters used in command line will overwrite those defined in the config files and that some parameters are mandatory in command line (like the output spaces).
 
-MRIQC is ran both on a subject-session and group level. However, the group level MRIQC expects the folder containing all the MRIQC derivatives from subject-session level jobs, overwise, it will return a "no data found" error.
+MRIQC can be ran both on a subject-session and group level. However, the group level MRIQC expects the folder containing all the MRIQC derivatives from subject-session level jobs, overwise, it will return a "no data found" error. And all it does is aggregate the subject-level results. 
+
+## QC
+A few QC indicators are extracted for each type of derivatives, such as Status, runtime duration, etc. 
+These are additional parameters, but be sure to also check the MRIQC outputs for each derivatives. 
 
 **File system**
 Data must be organized according to the BIDS format (https://bids.neuroimaging.io/index.html). The derivatives are also organized according to the BIDS derivatives specification. An example of the expected file structure is given below:

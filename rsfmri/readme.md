@@ -7,16 +7,17 @@ This pipeline processes BIDS-formatted neuroimaging data using fMRIPrep 25.2 fol
 - Singularity installed
 - BIDS-compliant dataset
 - Sufficient storage space for derivatives
-- Access to fMRIPrep 25.2 and XCP-D containers
+- Access to fMRIPrep 25.2.2 and XCP-D 0.12.0 containers
 
 ## Pipeline Structure
 
 1. **fMRIPrep Processing**
-    - Version: 25.2
+    - Version: 25.2.2
     - Input: BIDS dataset
     - Output: fMRIPrep derivatives
 
 2. **XCP-D Post-processing**
+    - Version: 0.12.0
     - Input: fMRIPrep derivatives
     - Output: Processed functional connectivity data
 
@@ -25,14 +26,14 @@ This pipeline processes BIDS-formatted neuroimaging data using fMRIPrep 25.2 fol
 ```bash
 # Run fMRIPrep
 singularity run --cleanenv \
-     fmriprep-25.2.sif \
+     fmriprep_25.2.2.sif \
      /path/to/bids \
      /path/to/output \
      participant
 
 # Run XCP-D
 singularity run --cleanenv \
-     xcpd.sif \
+     xcpd_0.12.0.sif \
      /path/to/fmriprep/output \
      /path/to/xcpd/output \
      participant

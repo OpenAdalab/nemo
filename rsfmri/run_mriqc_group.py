@@ -58,7 +58,7 @@ def is_already_processed(config, input_dir, data_type="raw"):
 # Create SLURM job scripts 
 # ------------------------
 def generate_slurm_mriqc_script(config, input_dir, path_to_script, data_type="raw", job_ids=None):
-    """Generate the SLURM job script.
+    """Generate the SLURM job script for MRIQC group processing.
     Parameters
     ----------
    
@@ -162,10 +162,8 @@ def run_mriqc_group(config, input_dir, data_type="raw", job_ids=None):
     Run the MRIQC for a given input directory.
     Parameters
     ----------
-    subject : str
-        Subject identifier.
-    session : str
-        Session identifier.
+    input_dir : str
+        Input directory containing the data to be processed.
     data_type : str
         Type of data to process (possible choices: "raw", "fmriprep", "xcp_d", "qsirecon" or "qsiprep").
     job_ids : list, optional

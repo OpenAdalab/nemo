@@ -18,7 +18,13 @@ from config import config
 # ------------------------
 
 def is_mriqc_done(config, subject, session):
+    """
+    Checks if MRIQC processing is done for a given subject and session.
     
+    :param config: Configuration object containing paths and settings.
+    :param subject: Subject identifier (e.g., 'sub-01').
+    :param session: Session identifier (e.g., 'ses-01').
+    """
     DERIVATIVES_DIR = config["common"]["derivatives"]
     stdout_dir = f"{DERIVATIVES_DIR}/qc/xcpd/stdout"
     prefix = f"qc_xcpd_{subject}_{session}"
@@ -133,7 +139,6 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
     
     )
     # Define the Singularity command for running MRIQC
-    # Note: Unlike fmriprep, no config file is used here, the option doesn't exist for mriqc
     input_dir = f"{DERIVATIVES_DIR}/xcpd/outputs"
     
     singularity_cmd = (
@@ -150,7 +155,6 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         f'    --bids-filter-file /bids_filter_dir/bids_filter_{session}.json \\\n'
         f'    --mem {mriqc["requested_mem"]} \\\n'
         f'    -w $TMP_WORK_DIR \\\n'
-        f'    --fd_thres 0.5 \\\n'
         f'    --verbose-reports \\\n'
         f'    --verbose \\\n'
         f'    --no-sub --notrack\n'

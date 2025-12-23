@@ -20,7 +20,10 @@ warnings.filterwarnings("ignore")
 # ------------------------
 
 def is_mriqc_done(config, subject, session):
-    
+    """ 
+    Checks if MRIQC processing is done for a given subject and session.
+    """
+
     DERIVATIVES_DIR = config["common"]["derivatives"]
     stdout_dir = f"{DERIVATIVES_DIR}/qc/fmriprep/stdout"
     prefix = f"qc_fmriprep_{subject}_{session}"
@@ -36,7 +39,9 @@ def is_mriqc_done(config, subject, session):
     
 
 def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_ids=None):
-    """Generate the SLURM job script.
+    """
+    Generate the SLURM job script for MRIQC FMRIPREP processing.
+
     Parameters
     ----------
     config : dict

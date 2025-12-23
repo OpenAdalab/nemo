@@ -208,7 +208,7 @@ def main(config_file=None):
                 print("⚠️  QC on XCP-D skipped")
                 qc_xcpd_job_id = None
 
-        # print("\n✅ Workflow submission complete")
+        print("\n✅ Workflow submission complete for subject:", subject)
 
     # -------------------------------------------
     # 6. QC FREESURFER
