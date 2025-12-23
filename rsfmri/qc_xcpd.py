@@ -97,22 +97,22 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
         f'source /scratch/hrasoanandrianina/python_env/fmriprep_env/bin/activate \n'
     )
 
-    tmp_dir_setup = (
-        f'\nhostname\n'
-        f'# Choose writable scratch directory\n'
-        f'if [ -n "$SLURM_TMPDIR" ]; then\n'
-        f'    TMP_WORK_DIR="$SLURM_TMPDIR"\n'
-        f'elif [ -n "$TMPDIR" ]; then\n'
-        f'    TMP_WORK_DIR="$TMPDIR"\n'
-        f'else\n'
-        f'    TMP_WORK_DIR=$(mktemp -d /tmp/qc_xcpd_{subject}_{session})\n'
-        f'fi\n'
+    # tmp_dir_setup = (
+    #     f'\nhostname\n'
+    #     f'# Choose writable scratch directory\n'
+    #     f'if [ -n "$SLURM_TMPDIR" ]; then\n'
+    #     f'    TMP_WORK_DIR="$SLURM_TMPDIR"\n'
+    #     f'elif [ -n "$TMPDIR" ]; then\n'
+    #     f'    TMP_WORK_DIR="$TMPDIR"\n'
+    #     f'else\n'
+    #     f'    TMP_WORK_DIR=$(mktemp -d /tmp/qc_xcpd_{subject}_{session})\n'
+    #     f'fi\n'
 
-        f'mkdir -p $TMP_WORK_DIR\n'
-        f'chmod -Rf 771 $TMP_WORK_DIR\n'
-        f'echo "Using TMP_WORK_DIR = $TMP_WORK_DIR"\n'
-        f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/qc/xcpd/{subject}_{session}"\n'
-    )
+    #     f'mkdir -p $TMP_WORK_DIR\n'
+    #     f'chmod -Rf 771 $TMP_WORK_DIR\n'
+    #     f'echo "Using TMP_WORK_DIR = $TMP_WORK_DIR"\n'
+    #     f'echo "Using OUT_MRIQC_DIR = {DERIVATIVES_DIR}/qc/xcpd/{subject}_{session}"\n'
+    # )
 
     prereq_check = (
         f'\n# Check that XCP-D finished without error\n'
@@ -178,7 +178,9 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
 
     # Write the complete SLURM script to the specified file
     with open(path_to_script, 'w') as f:
-        f.write(header + module_export + prereq_check + tmp_dir_setup + singularity_cmd + python_command + save_work)
+        # f.write(header + module_export + prereq_check + tmp_dir_setup + singularity_cmd + python_command + save_work)
+        f.write(header + module_export + prereq_check + singularity_cmd + python_command + save_work)
+
     print(f"Created MRIQC-XCP-D SLURM job: {path_to_script} for subject: {subject}, session: {session}")
 
 

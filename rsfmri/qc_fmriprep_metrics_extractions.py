@@ -8,7 +8,7 @@ from sklearn.metrics import mutual_info_score
 from nilearn.image import mean_img
 import warnings
 import os
-import toml
+import tomllib
 import utils
 warnings.filterwarnings("ignore")
 # -----------------------
@@ -203,4 +203,4 @@ if __name__ == "__main__":
     config_path, subject, session = sys.argv[1:4]
     with open(config_path, "rb") as f:
         config = tomllib.load(f)
-    extract_qc_metrics(config, subject, session)
+    run(config, subject, session)

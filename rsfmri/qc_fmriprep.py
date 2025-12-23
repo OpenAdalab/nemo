@@ -179,7 +179,9 @@ def generate_slurm_mriqc_script(config, subject, session, path_to_script, job_id
 
     # Write the complete SLURM script to the specified file
     with open(path_to_script, 'w') as f:
-        f.write(header + module_export + prereq_check + tmp_dir_setup + singularity_cmd + python_command + save_work)
+        # f.write(header + module_export + prereq_check + tmp_dir_setup + singularity_cmd + python_command + save_work)
+        f.write(header + module_export + prereq_check + singularity_cmd + python_command + save_work)
+
         print(f"Created QC-FMRIPREP with MRIQC container SLURM job: {path_to_script} for subject {subject}, session {session}")
         
         
