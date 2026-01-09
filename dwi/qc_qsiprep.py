@@ -1,184 +1,197 @@
 import json
 import os
 import sys
-from pathlib import Path
+import numpy as np
 import pandas as pd
-
-from run_mriqc_group import run_mriqc_group
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 import utils
-from dwi.qc_qsiprep_metrics_extractions import run as extract_qc_metrics
+from run_mriqc_group import run_mriqc_group
+from run_mriqc import run_mriqc
+from dwi.run_qsiprep import is_already_processed as is_qsiprep_done
 
 
-def generate_slurm_script(config, subject, session, path_to_script, job_ids=None):
-    """
-    Generate the SLURM job script for QC QCIprep processing.
-
-    Parameters
-    ----------
-    config : dict
-        Configuration dictionary.
-    subject : str
-        Subject identifier.
-    session : str
-        Session identifier.
-    path_to_script : str
-        Path to save the generated SLURM script.
-    job_ids : list, optional
-        List of SLURM job IDs to set as dependencies (default is None).
-    """
-
+def run_participant_qc(config, subject, session, job_ids=None):
     common = config["common"]
+    DERIVATIVES_DIR = common["derivatives"]
     mriqc = config["mriqc"]
-    DERIVATIVES_DIR = common["derivatives"]
 
-    header = (
-        f'#!/bin/bash\n'
-        f'#SBATCH --job-name=qc_qsiprep_{subject}_{session}\n'
-        f'#SBATCH --output={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_qsiprep_{subject}_{session}_%j.out\n'
-        f'#SBATCH --error={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_qsiprep_{subject}_{session}_%j.err\n'
-        f'#SBATCH --mem={mriqc["requested_mem"]}\n'
-        f'#SBATCH --time={mriqc["requested_time"]}\n'
-        f'#SBATCH --partition={mriqc["partition"]}\n'
-    )
+    if not is_qsiprep_done(config, subject, session):
+        print(f"[QC-QSIPREP] QSIPrep did not terminate for {subject} {session}. Please run QSIprep command before QC.")
+        return None
 
+    # Run participant-level MRIQC
+    print(f"[QC-QSIPREP] Submitting MRIQC job")
+    mriqc_job_id = run_mriqc(config, subject, session, data_type="qsiprep", job_ids=job_ids)
+
+    # Run in interactive mode to avoid using resources on the connection front
+    # It is also mandatory to ensure correct orchestration and wait for previous jobs to be terminated
+    print(f"[QC-QSIPREP] Submitting QC metric extraction in (background) interactive mode")
+    cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
+           f'--partition={mriqc["partition"]} '
+           f'--mem={mriqc["requested_mem"]}gb '
+           f'--time={mriqc["requested_time"]} '
+           f'--out={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_qsiprep_{subject}_{session}_%j.out '
+           f'--err={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_qsiprep_{subject}_{session}_%j.err ')
     if job_ids:
-        header += f'#SBATCH --dependency=afterok:{":".join(job_ids)}\n'
-
-    if common.get("email"):
-        header += (
-            f'#SBATCH --mail-type={common["email_frequency"]}\n'
-            f'#SBATCH --mail-user={common["email"]}\n'
-        )
-
-    if common.get("account"):
-        header += f'#SBATCH --account={common["account"]}\n'
-
-    module_export = (
-        f'\nmodule purge\n'
-        f'module load userspace/all\n'
-        f'module load singularity\n'
-        f'module load python3/3.12.0\n'
-        f'source {common["python_env"]}/bin/activate\n'
-    )
-
-    prereq_check = (
-        f'\n# Check that QSIPREP outputs exists\n'
-        f'if [ ! -d "{DERIVATIVES_DIR}/qsiprep/outputs/{subject}/{session}" ]; then\n'
-        f'    echo "[QC-QSIPREP] Please run QSIprep command before QC."\n'
-        f'    exit 1\n'
-        f'fi\n'
-
-        f'\n# Check that QSIPREP finished without error\n'
-        f'prefix="{DERIVATIVES_DIR}/qsiprep/stdout/qsiprep_{subject}_{session}"\n'
-        f'found_success=false\n'
-        f'for file in $(ls $prefix*.out 2>/dev/null); do\n'
-        f'    if grep -q "QSIPrep finished successfully" $file; then\n'
-        f'        found_success=true\n'
-        f'        break\n'
-        f'    fi\n'
-        f'done\n'
-        f'if [ "$found_success" = false ]; then\n'
-        f'    echo "[QC-QSIPREP] QSIPrep did not terminate for {subject} {session}. Please run QSIPrep command before QC."\n'
-        f'    exit 1\n'
-        f'fi\n'
-    )
-
-    # Define the Singularity command for running MRIQC
-    # Note: Unlike other BIDS apps, no config file is used here, the option doesn't exist for mriqc
-    singularity_command = (
-        f'\napptainer run \\\n'
-        f'    --cleanenv \\\n'
-        f'    -B {DERIVATIVES_DIR}/qsiprep/outputs:/data:ro \\\n'
-        f'    -B {DERIVATIVES_DIR}/qc/qsiprep:/out \\\n'
-        f'    -B {mriqc["bids_filter_dir"]}:/bids_filter_dir \\\n'
-        f'    {mriqc["mriqc_container"]} /data /out/outputs participant \\\n'
-        f'    --participant_label {subject} \\\n'
-        f'    --session-id {session} \\\n'
-        f'    --bids-filter-file /bids_filter_dir/bids_filter_{session}.json \\\n'
-        f'    --mem {mriqc["requested_mem"]} \\\n'
-        f'    -w /out/work \\\n'
-        f'    --fd_thres 0.5 \\\n'
-        f'    --verbose-reports \\\n'
-        f'    --verbose \\\n'
-        f'    --no-sub --notrack\n'
-    )
-
+        cmd += f'--dependency=afterok:{":".join(job_ids)} '
     # Call to python scripts for the rest of QC
-    python_command = (
-        f'\necho "Running QC metrics extraction"\n'
-        f'python3 dwi/qc_qsiprep_metrics_extractions.py '
-        f"'{json.dumps(config)}' '{subject}' '{session}'\n"
+    cmd += (
+        f'\necho "Running QC metric extraction"\n'
+        f'python3 dwi/qc_qsiprep.py '
+        f"'{json.dumps(config)}' 'participant' '{subject}' '{session}'\n"
     )
+    os.system(cmd)
 
-    # Add permissions for shared ownership of the output directory
-    ownership_sharing = f'\nchmod -Rf 771 {DERIVATIVES_DIR}/qc/qsiprep\n'
-
-    # Write the complete SLURM script to the specified file
-    with open(path_to_script, 'w') as f:
-        f.write(header + module_export + prereq_check + singularity_command + python_command + ownership_sharing)
-
-
-def run(config, subject, session, job_ids=None):
-
-    common = config["common"]
-    DERIVATIVES_DIR = common["derivatives"]
-
-    # Create output (derivatives) directories
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsiprep", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsiprep/outputs", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsiprep/stdout", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsiprep/scripts", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsiprep/work", exist_ok=True)
-
-    if not utils.is_mriqc_done(config, subject, session, runtype='qsiprep'):
-        path_to_script = f"{DERIVATIVES_DIR}/qc/qsiprep/scripts/qc_qsiprep_{subject}_{session}.slurm"
-        generate_slurm_script(config, subject, session, path_to_script, job_ids=job_ids)
-        cmd = f"sbatch {path_to_script}"
-        print(f"[QC-QSIPREP] Submitting job: {cmd}")
-        job_id = utils.submit_job(cmd)
-        return job_id
-
-    else:
-        print(f"[QC-QSIPREP] Skip already processed MRIQC")
-        print(f"[QC-QSIPREP] Performing only python command extraction for {subject}_{session}")
-        try:
-            # todo: should be ran in interactive mode...
-            extract_qc_metrics(config, subject, session)
-        except Exception as e:
-            print(f"[QC-QSIPREP] ERROR during QC extraction: {e}", file=sys.stderr)
-            raise
-
-    # # version interactive
-    # cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
-    #        f'--partition={fsqc["partition"]} '
-    #        f'--mem={fsqc["requested_mem"]}gb '
-    #        f'--time={fsqc["requested_time"]} '
-    #        f'--out={DERIVATIVES_DIR}/qc/freesurfer/stdout/qc_freesurfer_%j.out '
-    #        f'--err={DERIVATIVES_DIR}/qc/freesurfer/stdout/qc_freesurfer_%j.err ')
-    #
-    # if job_ids:
-    #     cmd += f'--dependency=afterok:{":".join(job_ids)} '
-    #
-    # python_command = (
-    #     f'\necho "Running QC metrics extraction"\n'
-    #     f'python3 dwi/qc_qsiprep_metrics_extractions.py '
-    #     f"'{json.dumps(config)}' '{subject}' '{session}'\n"
-    # )
-    #
-    # os.system(cmd)
-    # print(f"[QC-FREESURFER] Submitting (background) task on interactive node")
+    return mriqc_job_id
 
 
 def run_group_qc(config, job_ids=None):
 
     common = config["common"]
     DERIVATIVES_DIR = common["derivatives"]
+    mriqc = config["mriqc"]
 
+    # Run group-level MRIQC
+    run_mriqc_group(config, f"{DERIVATIVES_DIR}/qsiprep/outputs", data_type="qsiprep", job_ids=job_ids)
+
+    # Run in interactive mode to avoid using resources on the connection front
+    # It is also mandatory to ensure correct orchestration and wait for previous jobs to be terminated
+    print(f"[QSIPREP-GROUP-QC] Performing QC metric concatenation in (background) interactive mode")
+    cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
+           f'--partition={mriqc["partition"]} '
+           f'--mem={mriqc["requested_mem"]}gb '
+           f'--time={mriqc["requested_time"]} '
+           f'--out={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_group_qsiprep_{subject}_{session}_%j.out '
+           f'--err={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_group_qsiprep_{subject}_{session}_%j.err ')
+    if job_ids:
+        cmd += f'--dependency=afterok:{":".join(job_ids)} '
+    cmd += (
+        f'\necho "Running QC metric concatenation"\n'
+        f'python3 dwi/qc_qsiprep.py '
+        f"'{json.dumps(config)}' 'group'\n"
+    )
+    os.system(cmd)
+
+
+# ------------------------------------------
+# Metric extraction (call from srun command)
+# ------------------------------------------
+def metric_extraction(config, subject, session):
+    """
+    Extract QC metrics from fMRIPrep outputs.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary.
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing QC metrics for each subject and session.
+    """
+
+    DERIVATIVES_DIR = config["common"]["derivatives"]
+    output_dir = f"{DERIVATIVES_DIR}/qsiprep/outputs/{subject}/{session}"
+    anat = Path(f"{DERIVATIVES_DIR}/qsiprep/outputs/{subject}/{session}/anat")
+    dwi = Path(f"{DERIVATIVES_DIR}/qsiprep/outputs/{subject}/{session}/dwi")
+
+    try:
+        # Extract process status from log files
+        finished_status, runtime = utils.read_log(config, subject, session, runtype="qsiprep")
+        dir_count = utils.count_dirs(output_dir)
+        file_count = utils.count_files(output_dir)
+
+        # Load TSV file produced by QSIprep
+        qsiprep_metrics = f'{subject}_{session}_run-01_desc-confounds_timeseries.tsv'
+        df = pd.read_csv(os.path.join(output_dir, 'dwi', qsiprep_metrics), sep='\t')
+
+        max_framewise_displacement = df['framewise_displacement'].max()
+        max_rot_x = df['rot_x'].max()
+        max_rot_y = df['rot_y'].max()
+        max_rot_z = df['rot_z'].max()
+        max_trans_x = df['trans_x'].max()
+        max_trans_y = df['trans_y'].max()
+        max_trans_z = df['trans_z'].max()
+        max_eddy_stdevs = df['eddy_stdevs'].max()
+        max_denoising_change = df['DWIDenoise_change'].max() if 'DWIDenoise_change' in df.columns else 0
+        max_unringing_change = df['MRDeGibbs_change'].max() if 'MRDeGibbs_change' in df.columns else 0
+
+        # Identify required files
+        t1w = next(anat.glob("*_desc-preproc_T1w.nii.gz"))
+        t1w_mask = next(anat.glob("*_desc-brain_mask.nii.gz"))
+        seg = next(anat.glob("*_dseg.nii.gz"))
+        dwiref = next(dwi.glob("*_dwiref.nii.gz"))
+        dwi_mask = next(dwi.glob("*_desc-brain_mask.nii.gz"))
+
+        # Load data
+        t1w_img = utils.load_any_image(t1w)
+        t1w_data = t1w_img.get_fdata()
+        t1w_mask_img = utils.load_any_image(t1w_mask)
+        t1w_mask_data = t1w_mask_img.get_fdata()
+        dwi_img = utils.load_any_image(dwiref)
+        dwi_data = dwi_img.get_fdata()
+        dwi_mask_img = utils.load_any_image(dwi_mask)
+        dwi_mask_data = dwi_mask_img.get_fdata()
+        seg_img = utils.load_any_image(seg)
+        seg_data = seg_img.get_fdata()
+
+        # Resample dwi into t1w space
+        t1w_brain = t1w_data * t1w_mask_data
+        dwi_brain = dwi_data * dwi_mask_data
+        dwi_brain_hr = utils.resample(dwi_brain, t1w_data)
+        dwi_mask_data_hr = utils.resample(dwi_mask_data, t1w_data)
+
+        # Compute QC metrics
+        row = dict(
+            subject=subject,
+            session=session,
+            Process_Run="qsiprep",
+            Finished_without_error=finished_status,
+            Processing_time_hours=runtime,
+            Number_of_folders_generated=dir_count,
+            Number_of_files_generated=file_count,
+            t1w_shape=t1w_data.shape,
+            dwiref_shape=dwi_data.shape,
+            brain_voxels_t1w=np.sum(t1w_mask_data > 0),
+            brain_voxels_dwi=np.sum(dwi_mask_data > 0),
+            gm_voxels=np.sum(seg_data == 2),
+            wm_voxels=np.sum(seg_data == 3),
+            csf_voxels=np.sum(seg_data == 1),
+            DICE_t1w_dwi=utils.dice(t1w_mask_data, dwi_mask_data_hr),
+            MI_t1w_dwi=utils.mutual_information(t1w_brain, dwi_brain_hr),
+            max_framewise_displacement=max_framewise_displacement,
+            max_rot_x=max_rot_x,
+            max_rot_y=max_rot_y,
+            max_rot_z=max_rot_z,
+            max_trans_x=max_trans_x,
+            max_trans_y=max_trans_y,
+            max_trans_z=max_trans_z,
+            max_eddy_stdevs=max_eddy_stdevs,
+            max_denoising_change=max_denoising_change,
+            max_unringing_change=max_unringing_change,
+        )
+
+        sub_ses_qc = pd.DataFrame([row])
+        # Save outputs to csv file
+        path_to_qc = f"{DERIVATIVES_DIR}/qc/qsiprep/outputs/{subject}/{session}/{subject}_{session}_qc.csv"
+        sub_ses_qc.to_csv(path_to_qc, mode='w', header=True, index=False)
+        print(f"QC saved in {path_to_qc}\n")
+
+        print(f"QSIPrep Quality Check terminated successfully for {subject} {session}.")
+
+    except Exception as e:
+        print(f"⚠️ ERROR: QC aborted for {subject} {session}: \n{e}")
+
+
+def metric_concatenation(config):
+
+    DERIVATIVES_DIR = config["common"]["derivatives"]
+
+    # Load and Concatenate participant-level metrics
     qc_inhouse = []
     qc_qsiprep = []
-
     # List all subjects and sessions in the QSIprep BIDS output directory
     subjects = utils.get_subjects(f"{DERIVATIVES_DIR}/qsiprep/outputs")
     for subject in subjects:
@@ -200,7 +213,7 @@ def run_group_qc(config, job_ids=None):
 
     if qc_inhouse:
         group_qc = pd.concat(qc_inhouse, ignore_index=True)
-        path_to_group_qc = f"{DERIVATIVES_DIR}/qc/qsiprep/group_additional_qc.csv"
+        path_to_group_qc = f"{DERIVATIVES_DIR}/qc/qsiprep/group_minimal_qc.csv"
         group_qc.to_csv(path_to_group_qc, index=False)
 
     if qc_qsiprep:
@@ -208,8 +221,22 @@ def run_group_qc(config, job_ids=None):
         path_to_group_qc = f"{DERIVATIVES_DIR}/qc/qsiprep/group_qsiprep_image_qc.csv"
         group_qc.to_csv(path_to_group_qc, index=False)
 
-    # Run group-level MRIQC
-    run_mriqc_group(config, f"{DERIVATIVES_DIR}/qsiprep/outputs", data_type="qsiprep", job_ids=job_ids)
-
     print(f"[QC-QSIPREP] Group-level QC saved in {DERIVATIVES_DIR}/qc/qsiprep\n")
 
+
+if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) < 3:
+        raise RuntimeError(
+            "Usage: python qc_qsiprep.py <config> participant <subject> <session>"
+            "Usage: python qc_qsiprep.py <config> group"
+        )
+    config = json.loads(sys.argv[1])
+    level = sys.argv[2]
+    if level == 'participant':
+        subject = sys.argv[3]
+        session = sys.argv[4]
+        metric_extraction(config, subject, session)
+    if level == 'group':
+        metric_concatenation(config)

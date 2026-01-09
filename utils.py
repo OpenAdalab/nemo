@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 import nibabel as nib
 import warnings
+import json
 warnings.filterwarnings("ignore")
 
 
@@ -66,6 +67,20 @@ def get_sessions(input_dir, subject, specified_sessions=None):
 
     return sorted(
         d for d in os.listdir(subject_path) if d.startswith("ses-") and os.path.isdir(os.path.join(subject_path, d)))
+
+
+def get_tasks(session):
+    # Read bids_filter file to get the list of tasks to consider
+    bids_filter_path = Path(__file__).resolve().parent / "rsfmri" / "bids_filters" / f"bids_filter_{session}.json"
+    if not bids_filter_path.is_file():
+        raise FileNotFoundError(f"BIDS filter file {bids_filter_path} not found.")
+    with open(bids_filter_path, 'r') as f:
+        bids_filter_content = json.load(f)
+    tasks = bids_filter_content["bold"]["task"]
+    # Convert a single string into a list
+    if isinstance(tasks, str):
+        tasks = [tasks]
+    return tasks
 
 
 def subject_exists(input_dir, subject):
@@ -242,22 +257,22 @@ def read_log(config, subject, session, runtype):
     return finished_status, runtime
 
 
-def is_mriqc_done(config, subject, session, runtype):
-    """
-    Checks if MRIQC processing is done for a given subject and session.
-    """
-
-    DERIVATIVES_DIR = config["common"]["derivatives"]
-    stdout_dir = f"{DERIVATIVES_DIR}/qc/{runtype}/stdout"
-    prefix = f"qc_{runtype}_{subject}_{session}"
-    if os.path.exists(stdout_dir):
-        stdout_files = [f for f in os.listdir(stdout_dir) if (f.startswith(prefix) and f.endswith('.out'))]
-        for file in stdout_files:
-            file_path = os.path.join(stdout_dir, file)
-            with open(file_path, 'r') as f:
-                if 'MRIQC completed' in f.read():
-                    return True
-    return False
+# def is_mriqc_done(config, subject, session, runtype):
+#     """
+#     Checks if MRIQC processing is done for a given subject and session.
+#     """
+#
+#     DERIVATIVES_DIR = config["common"]["derivatives"]
+#     stdout_dir = f"{DERIVATIVES_DIR}/qc/{runtype}/stdout"
+#     prefix = f"qc_{runtype}_{subject}_{session}"
+#     if os.path.exists(stdout_dir):
+#         stdout_files = [f for f in os.listdir(stdout_dir) if (f.startswith(prefix) and f.endswith('.out'))]
+#         for file in stdout_files:
+#             file_path = os.path.join(stdout_dir, file)
+#             with open(file_path, 'r') as f:
+#                 if 'MRIQC completed' in f.read():
+#                     return True
+#     return False
 
 
 def load_any_image(path: Path) -> np.ndarray:

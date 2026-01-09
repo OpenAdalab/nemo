@@ -360,7 +360,10 @@ def run(config, job_ids=None):
     cmd += f'sh {path_to_script} &'
 
     os.system(cmd)
-    print(f"[QC-FREESURFER] Submitting (background) task on interactive node")
+    print(f"[QC-FREESURFER] Submitting (background) task on interactive node\n")
+    print(f"[QC-FREESURFER] - FSQC\n")
+    print(f"[QC-FREESURFER] - Parcel Volume Normalization\n")
+    print(f"[QC-FREESURFER] - Outlier Detection")
     return
 
 

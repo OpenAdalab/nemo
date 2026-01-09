@@ -15,19 +15,18 @@ import os
 from datetime import datetime
 from pathlib import Path
 import sys
-from anat import qc_freesurfer
-from dwi import qc_qsiprep, qc_qsirecon
 import toml
 sys.path.append(str(Path(__file__).resolve().parent))
 import utils
+from anat import qc_freesurfer
+from dwi import qc_qsiprep, qc_qsirecon
+from rsfmri import qc_fmriprep, qc_xcpd
 from anat.run_freesurfer import run_freesurfer
 from dwi.run_qsiprep import run_qsiprep
 from dwi.run_qsirecon import run_qsirecon
 from rsfmri.run_fmriprep import run_fmriprep
-from run_mriqc import run_mriqc
-from rsfmri.qc_fmriprep import run_qc_fmriprep
 from rsfmri.run_xcpd import run_xcpd
-from rsfmri.qc_xcpd import run_qc_xcpd
+from run_mriqc import run_mriqc
 from run_mriqc_group import run_mriqc_group
 
 
@@ -148,7 +147,7 @@ def main(config_file=None):
             if workflow.get("run_qsiprep_qc"):
                 print("[QSIPREP-QC]")
                 dependencies = [job_id for job_id in [qsiprep_job_id] if job_id is not None]
-                qc_qsiprep_job_id = qc_qsiprep.run(
+                qc_qsiprep_job_id = qc_qsiprep.run_participant_qc(
                     config,
                     subject=subject,
                     session=session,
@@ -176,7 +175,7 @@ def main(config_file=None):
             if workflow.get("run_qsirecon_qc"):
                 print("[QSIRECON-QC]")
                 dependencies = [job_id for job_id in [qsirecon_job_id] if job_id is not None]
-                qc_qsirecon_job_id = qc_qsirecon.run(
+                qc_qsirecon_job_id = qc_qsirecon.run_participant_qc(
                     config,
                     subject=subject,
                     session=session,
@@ -205,15 +204,13 @@ def main(config_file=None):
             if workflow.get("run_fmriprep_qc"):
                 print("[FMRIPREP-QC]")
                 dependencies = [job_id for job_id in [fmriprep_job_id] if job_id is not None]
-                qc_fmriprep_job_id = run_qc_fmriprep(
+                qc_fmriprep_job_id = qc_fmriprep.run_participant_qc(
                     config,
                     subject=subject,
                     session=session,
                     job_ids=dependencies
                 )
-            else:
-                qc_fmriprep_job_id = None
-            qc_fmriprep_job_ids.append(qc_fmriprep_job_id)
+                qc_fmriprep_job_ids.append(qc_fmriprep_job_id)
 
             # -------------------------------------------
             # 5a. XCP-D
@@ -235,7 +232,7 @@ def main(config_file=None):
             if workflow.get("run_xcpd_qc"):
                 print("[XCPD-QC]")
                 dependencies = [job_id for job_id in [xcpd_job_id] if job_id is not None]
-                qc_xcpd_job_id = run_qc_xcpd(
+                qc_xcpd_job_id = qc_xcpd.run_participant_qc(
                     config,
                     subject=subject,
                     session=session,
@@ -278,46 +275,24 @@ def main(config_file=None):
         print(f"[QSIPREP-GROUP-QC]")
         dependencies = [job_id for job_id in qc_qsiprep_job_ids if job_id is not None]
         qc_qsiprep.run_group_qc(config, job_ids=dependencies)
-        # run_mriqc_group(
-        #     config,
-        #     data_type="qsiprep",
-        #     input_dir=f"{DERIVATIVES_DIR}/qsiprep/outputs",
-        #     job_ids=dependencies
-        # )
-        #
-        # # MRIQC group-level for qsirecon data
-        # # -------------------------------------------
-        # print(f"[MRIQC-QSIRECON-GROUP]")
-        # dependencies = [job_id for job_id in qc_qsirecon_job_ids if job_id is not None]
-        # run_mriqc_group(
-        #     config,
-        #     data_type="qsirecon",
-        #     input_dir=f"{DERIVATIVES_DIR}/qsirecon/outputs",
-        #     job_ids=dependencies
-        # )
-        #
-        # # QC group-level for fmriprep data
-        # # -------------------------------------------
-        # print(f"[MRIQC-FMRIPREP-GROUP]")
-        # dependencies = [job_id for job_id in qc_fmriprep_job_ids if job_id is not None]
-        # run_mriqc_group(
-        #     config,
-        #     data_type="fmriprep",
-        #     input_dir=f"{DERIVATIVES_DIR}/fmriprep/outputs",
-        #     job_ids=dependencies
-        # )
-        #
-        # # MRIQC group-level for xcp_d data
-        # # -------------------------------------------
-        # print(f"[MRIQC-XCPD-GROUP]")
-        # dependencies = [job_id for job_id in qc_xcpd_job_ids if job_id is not None]
-        # run_mriqc_group(
-        #     config,
-        #     data_type="xcp_d",
-        #     input_dir=f"{DERIVATIVES_DIR}/xcp_d/outputs",
-        #     job_ids=dependencies
-        # )
 
+        # QC group-level for qsirecon data
+        # -------------------------------------------
+        print(f"[QSIRECON-GROUP-QC]")
+        dependencies = [job_id for job_id in qc_qsirecon_job_ids if job_id is not None]
+        qc_qsirecon.run_group_qc(config, job_ids=dependencies)
+
+        # QC group-level for fmriprep data
+        # -------------------------------------------
+        print(f"[FMRIPREP-GROUP-QC]")
+        dependencies = [job_id for job_id in qc_fmriprep_job_ids if job_id is not None]
+        qc_fmriprep.run_group_qc(config, job_ids=dependencies)
+
+        # MRIQC group-level for xcp_d data
+        # -------------------------------------------
+        print(f"[XCPD-GROUP-QC]")
+        dependencies = [job_id for job_id in qc_xcpd_job_ids if job_id is not None]
+        qc_xcpd.run_group_qc(config, job_ids=dependencies)
 
 
 if __name__ == "__main__":
