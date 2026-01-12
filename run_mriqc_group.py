@@ -30,7 +30,7 @@ def generate_slurm_script(config, input_dir, path_to_script, data_type="raw", jo
         f'#SBATCH --job-name=group_mriqc_{data_type}\n'
         f'#SBATCH --output={DERIVATIVES_DIR}/qc/{data_type}/stdout/group_mriqc_{data_type}_%j.out\n'
         f'#SBATCH --error={DERIVATIVES_DIR}/qc/{data_type}/stdout/group_mriqc_{data_type}_%j.err\n'
-        f'#SBATCH --mem={mriqc["requested_mem"]}\n'
+        f'#SBATCH --mem={mriqc["requested_mem"]}gb\n'
         f'#SBATCH --time={mriqc["requested_time"]}\n'
         f'#SBATCH --partition={mriqc["partition"]}\n'
     )

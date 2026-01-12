@@ -18,16 +18,16 @@ def run_participant_qc(config, subject, session, job_ids=None):
     mriqc = config["mriqc"]
 
     if not is_qsiprep_done(config, subject, session):
-        print(f"[QC-QSIPREP] QSIPrep did not terminate for {subject} {session}. Please run QSIprep command before QC.")
+        print(f"[QSIPREP-QC] QSIPrep did not terminate for {subject} {session}. Please run QSIprep command before QC.")
         return None
 
     # Run participant-level MRIQC
-    print(f"[QC-QSIPREP] Submitting MRIQC job")
+    print(f"[QSIPREP-QC] Submitting MRIQC job")
     mriqc_job_id = run_mriqc(config, subject, session, data_type="qsiprep", job_ids=job_ids)
 
     # Run in interactive mode to avoid using resources on the connection front
     # It is also mandatory to ensure correct orchestration and wait for previous jobs to be terminated
-    print(f"[QC-QSIPREP] Submitting QC metric extraction in (background) interactive mode")
+    print(f"[QSIPREP-QC] Submitting QC metric extraction in (background) interactive mode")
     cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
            f'--partition={mriqc["partition"]} '
            f'--mem={mriqc["requested_mem"]} '
@@ -37,11 +37,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
     # Call to python scripts for the rest of QC
-    cmd += (
-        f'\necho "Running QC metric extraction"\n'
-        f'python3 dwi/qc_qsiprep.py '
-        f"'{json.dumps(config)}' 'participant' '{subject}' '{session}'\n"
-    )
+    cmd += f"python3 dwi/qc_qsiprep.py '{json.dumps(config)}' participant {subject} {session} &"
     os.system(cmd)
 
     return mriqc_job_id
@@ -217,7 +213,7 @@ def metric_concatenation(config):
         path_to_group_qc = f"{DERIVATIVES_DIR}/qc/qsiprep/group_qsiprep_image_qc.csv"
         group_qc.to_csv(path_to_group_qc, index=False)
 
-    print(f"[QC-QSIPREP] Group-level QC saved in {DERIVATIVES_DIR}/qc/qsiprep\n")
+    print(f"[QSIPREP-QC] Group-level QC saved in {DERIVATIVES_DIR}/qc/qsiprep\n")
 
 
 if __name__ == "__main__":

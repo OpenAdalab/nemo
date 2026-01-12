@@ -15,17 +15,17 @@ def run_participant_qc(config, subject, session, job_ids=None):
     mriqc = config["mriqc"]
 
     if not is_qsirecon_done(config, subject, session):
-        print(f"[QC-QSIRECON] QSIrecon did not terminate for {subject} {session}. Please run QSIrecon command before QC.")
+        print(f"[QSIRECON-QC] QSIrecon did not terminate for {subject} {session}. Please run QSIrecon command before QC.")
         return None
 
     # Create output (derivatives) directories
     os.makedirs(f"{DERIVATIVES_DIR}/qc/qsirecon", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsirecon/outputs", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsirecon/outputs/{subject}/{session}", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qc/qsirecon/stdout", exist_ok=True)
 
     # Run in interactive mode to avoid using resources on the connection front
     # It is also mandatory to ensure correct orchestration and wait for previous jobs to be terminated
-    print(f"[QC-QSIRECON] Submitting QC metric extraction in (background) interactive mode")
+    print(f"[QSIRECON-QC] Submitting QC metric extraction in (background) interactive mode")
     cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
            f'--partition={mriqc["partition"]} '
            f'--mem={mriqc["requested_mem"]} '
@@ -35,11 +35,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
     # Call to python scripts for the rest of QC
-    cmd += (
-        f'\necho "Running QC metric extraction"\n'
-        f'python3 dwi/qc_qsirecon.py '
-        f"'{json.dumps(config)}' 'participant' '{subject}' '{session}'\n"
-    )
+    cmd += f"python3 dwi/qc_qsirecon.py '{json.dumps(config)}' participant {subject} {session} &"
     os.system(cmd)
     return 0
 
@@ -61,7 +57,7 @@ def run_group_qc(config, job_ids=None):
            f'--err={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_group_qsirecon_%j.err ')
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
-    cmd += f"python3 dwi/qc_qsirecon.py '{json.dumps(config)}' group"
+    cmd += f"python3 dwi/qc_qsirecon.py '{json.dumps(config)}' group &"
     os.system(cmd)
 
 
@@ -137,7 +133,7 @@ def metric_concatenation(config):
         path_to_group_qc = f"{DERIVATIVES_DIR}/qc/qsirecon/group_minimal_qc.csv"
         group_qc.to_csv(path_to_group_qc, index=False)
 
-    print(f"[QC-QSIRECON] Group-level QC saved in {DERIVATIVES_DIR}/qc/qsirecon\n")
+    print(f"[QSIRECON-QC] Group-level QC saved in {DERIVATIVES_DIR}/qc/qsirecon\n")
 
 
 if __name__ == "__main__":
