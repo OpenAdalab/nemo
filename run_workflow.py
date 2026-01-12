@@ -282,17 +282,17 @@ def main(config_file=None):
         dependencies = [job_id for job_id in qc_qsirecon_job_ids if job_id is not None]
         qc_qsirecon.run_group_qc(config, job_ids=dependencies)
 
-        # QC group-level for fmriprep data
-        # -------------------------------------------
-        print(f"[FMRIPREP-GROUP-QC]")
-        dependencies = [job_id for job_id in qc_fmriprep_job_ids if job_id is not None]
-        qc_fmriprep.run_group_qc(config, job_ids=dependencies)
-
-        # MRIQC group-level for xcp_d data
-        # -------------------------------------------
-        print(f"[XCPD-GROUP-QC]")
-        dependencies = [job_id for job_id in qc_xcpd_job_ids if job_id is not None]
-        qc_xcpd.run_group_qc(config, job_ids=dependencies)
+        # # QC group-level for fmriprep data
+        # # -------------------------------------------
+        # print(f"[FMRIPREP-GROUP-QC]")
+        # dependencies = [job_id for job_id in qc_fmriprep_job_ids if job_id is not None]
+        # qc_fmriprep.run_group_qc(config, job_ids=dependencies)
+        #
+        # # MRIQC group-level for xcp_d data
+        # # -------------------------------------------
+        # print(f"[XCPD-GROUP-QC]")
+        # dependencies = [job_id for job_id in qc_xcpd_job_ids if job_id is not None]
+        # qc_xcpd.run_group_qc(config, job_ids=dependencies)
 
 
 if __name__ == "__main__":

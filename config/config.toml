@@ -4,14 +4,13 @@
 [common]
 input_dir = "/scratch/lhashimoto/nemo_database/imaging_data"
 derivatives = "/scratch/lhashimoto/nemo_derivatives"
-subjects = ["1054001","1054002","1054003","1054004","1054010"] #["1054002"]
+subjects = []  #["1054001","1054002","1054003","1054004","1054010"] #["1054002"]
 sessions = ["01"]
 freesurfer_license = "/scratch/lhashimoto/freesurfer/license"
 python_env = "/scratch/lhashimoto/python/env/nemo"
 account = ""
 email = ""
 email_frequency = "FAIL" # BEGIN,END
-tmp = ["1054001","1054002","1054003","1054004","1054010"]
 
 #input_dir = "/scratch/hrasoanandrianina/braint_database"  # "/scratch/lhashimoto/nemo_database/imaging_data"
 #derivatives = "/scratch/lhashimoto/braint_derivatives"  # ""/scratch/lhashimoto/nemo_derivatives"
@@ -22,7 +21,6 @@ tmp = ["1054001","1054002","1054003","1054004","1054010"]
 #account = ""
 #email = ""
 #email_frequency = "FAIL" # BEGIN,END
-#tmp = ["1054001","1054002","1054003","1054004","1054010"]
 
 # =============================
 #   WORKFLOW SETTINGS
