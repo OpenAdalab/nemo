@@ -139,4 +139,3 @@ partition = "skylake"
 requested_mem = "64"
 requested_time = "3:00:00"
 skip_processed = true
-# todo: enlever les Gb partout
