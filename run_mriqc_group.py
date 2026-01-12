@@ -69,7 +69,7 @@ def generate_slurm_script(config, input_dir, path_to_script, data_type="raw", jo
         f'    --verbose \\\n'
         f'    --no-sub --notrack\n'
     )
-
+    # todo: besoin du bids_filter_file ?
     save_work = (
         f'\nmv {DERIVATIVES_DIR}/qc/{data_type}/outputs/group* {DERIVATIVES_DIR}/qc/{data_type}/\n'
         f'\nchmod -Rf 771 {DERIVATIVES_DIR}/qc/{data_type}\n'

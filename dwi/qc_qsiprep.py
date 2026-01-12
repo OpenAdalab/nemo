@@ -54,7 +54,7 @@ def run_group_qc(config, job_ids=None):
     mriqc = config["mriqc"]
 
     # Run group-level MRIQC
-    # run_mriqc_group(config, f"{DERIVATIVES_DIR}/qsiprep/outputs", data_type="qsiprep", job_ids=job_ids)
+    run_mriqc_group(config, f"{DERIVATIVES_DIR}/qsiprep/outputs", data_type="qsiprep", job_ids=job_ids)
 
     # Run in interactive mode to avoid using resources on the connection front
     # It is also mandatory to ensure correct orchestration and wait for previous jobs to be terminated
