@@ -31,17 +31,12 @@ def run_participant_qc(config, subject, session, job_ids=None):
            f'--mem={mriqc["requested_mem"]} '
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_qsirecon_{subject}_{session}_%j.out '
-           f'--err={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_qsirecon_{subject}_{session}_%j.err '
-           f'--export=ALL')
+           f'--err={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_qsirecon_{subject}_{session}_%j.err ')
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
     # Call to python scripts for the rest of QC
-    cmd += f'echo "JobID=$SLURM_JOB_ID" ; '
     cmd += f"python3 dwi/qc_qsirecon.py '{json.dumps(config)}' participant {subject} {session} &"
-    job_id = utils.submit_job(cmd, 'interactive')  # todo: faire pareil pour les autres
-    print(job_id)
-
-    return job_id
+    os.system(cmd)
 
 
 def run_group_qc(config, job_ids=None):

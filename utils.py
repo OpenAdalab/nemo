@@ -9,7 +9,6 @@ from pathlib import Path
 import nibabel as nib
 import warnings
 import json
-
 warnings.filterwarnings("ignore")
 
 
@@ -134,7 +133,7 @@ def has_func_fmap(input_dir, subject):
         (Path(input_dir) / subject).glob("**/fmap/*"))
 
 
-def submit_job(cmd, mode='batch'):
+def submit_job(cmd):
     """
     Submits a SLURM job using the provided command and returns the job ID.
 
@@ -159,16 +158,11 @@ def submit_job(cmd, mode='batch'):
         # Execute the sbatch command and capture the output
         result = subprocess.run(cmd, shell=True, check=True, text=True, capture_output=True)
         output = result.stdout.strip()
-        print(output)
 
         # Parse the output to extract the job ID
-        if mode == 'batch' and output.startswith("Submitted batch job"):
+        if output.startswith("Submitted batch job"):
             job_id = output.split()[-1]
             print(f"SLURM job successfully submitted: ID {job_id}")
-            return job_id
-        elif mode == 'interactive':
-            job_id = output.split()[-1]
-            print(job_id)
             return job_id
         else:
             print("Unable to retrieve the SLURM job ID.")
