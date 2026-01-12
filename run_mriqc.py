@@ -142,7 +142,7 @@ def generate_slurm_script(config, subject, session, path_to_script, data_type="r
         f'\napptainer run \\\n'
         f'    --cleanenv \\\n'
         f'    -B {MRIQC_INPUT}:/data:ro \\\n'
-        f'    -B {DERIVATIVES_DIR}/qc/{data_type}/outputs:/out \\\n'
+        f'    -B {DERIVATIVES_DIR}/qc/{data_type}:/out \\\n'
         f'    -B {mriqc["bids_filter_dir"]}:/bids_filter_dir \\\n'
         f'    {mriqc["mriqc_container"]} /data /out/outputs participant \\\n'
         f'    --participant_label {subject} \\\n'
@@ -190,7 +190,7 @@ def run_mriqc(config, subject, session, data_type="raw", job_ids=None):
         List of SLURM job IDs to set as dependencies (default is None).
     """
 
-    if data_type not in ["raw", "fmriprep", "xcpd", "qsiprep", "qsirecon"]:
+    if data_type not in ["raw", "fmriprep", "qsiprep"]:
         print(f"Invalid data_type: {data_type}. Must be 'raw', 'fmriprep', or 'qsiprep'.")
         return None
 

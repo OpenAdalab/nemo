@@ -72,8 +72,8 @@ def run_group_qc(config, job_ids=None):
            f'--partition={mriqc["partition"]} '
            f'--mem={mriqc["requested_mem"]}gb '
            f'--time={mriqc["requested_time"]} '
-           f'--out={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_group_xcpd_{subject}_{session}_%j.out '
-           f'--err={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_group_xcpd_{subject}_{session}_%j.err ')
+           f'--out={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_group_xcpd_%j.out '
+           f'--err={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_group_xcpd_%j.err ')
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
     cmd += (
