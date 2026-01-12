@@ -259,7 +259,7 @@ def main(config_file=None):
     # 7. GROUP-LEVEL QC
     # -------------------------------------------------------
     if workflow.get("run_group_qc"):
-        # print(f"\n================ Group-level QC ================\n")
+        print(f"\n================ Group-level QC ================\n")
         #
         # # QC group-level for raw data
         # # -------------------------------------------

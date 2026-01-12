@@ -112,7 +112,7 @@ def generate_slurm_fmriprep_script(config, subject, session, path_to_script, fs_
         f'#SBATCH --job-name=fmriprep_{subject}_{session}\n'
         f'#SBATCH --output={common["derivatives"]}/fmriprep/stdout/fmriprep_{subject}_{session}_%j.out\n'
         f'#SBATCH --error={common["derivatives"]}/fmriprep/stdout/fmriprep_{subject}_{session}_%j.err\n'
-        f'#SBATCH --mem={fmriprep["requested_mem"]}\n'
+        f'#SBATCH --mem={fmriprep["requested_mem"]}gb\n'
         f'#SBATCH --time={fmriprep["requested_time"]}\n'
         f'#SBATCH --partition={fmriprep["partition"]}\n'
     )

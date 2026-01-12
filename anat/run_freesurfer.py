@@ -94,7 +94,7 @@ def generate_slurm_script(config, subject, session, path_to_script):
         f'#SBATCH -J freesurfer_{subject}_{session}\n'
         f'#SBATCH -p {freesurfer["partition"]}\n'
         f'#SBATCH --nodes=1\n'
-        f'#SBATCH --mem={freesurfer["requested_mem"]}\n'
+        f'#SBATCH --mem={freesurfer["requested_mem"]}gb\n'
         f'#SBATCH -t {freesurfer["requested_time"]}\n'
         f'#SBATCH -e {DERIVATIVES_DIR}/freesurfer/stdout/%x_job-%j.err\n'
         f'#SBATCH -o {DERIVATIVES_DIR}/freesurfer/stdout/%x_job-%j.out\n'

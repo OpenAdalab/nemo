@@ -35,7 +35,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
 
     # Create output (derivatives) directories
     os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd/outputs", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd/outputs/{subject}/{session}", exist_ok=True)
     os.makedirs(f"{DERIVATIVES_DIR}/qc/xcpd/stdout", exist_ok=True)
 
     # Run in interactive mode to avoid using resources on the connection front
@@ -43,18 +43,14 @@ def run_participant_qc(config, subject, session, job_ids=None):
     print(f"[QC-XCPD] Submitting QC metric extraction in (background) interactive mode")
     cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
            f'--partition={mriqc["partition"]} '
-           f'--mem={mriqc["requested_mem"]}gb '
+           f'--mem={mriqc["requested_mem"]} '
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_xcpd_{subject}_{session}_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_xcpd_{subject}_{session}_%j.err ')
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
     # Call to python scripts for the rest of QC
-    cmd += (
-        f'\necho "Running QC metric extraction"\n'
-        f'python3 rsfmri/qc_xcpd.py '
-        f"'{json.dumps(config)}' 'participant' '{subject}' '{session}'\n"
-    )
+    cmd += f"python3 rsfmri/qc_xcpd.py '{json.dumps(config)}' participant {subject} {session} &"
     os.system(cmd)
     return 0
 
@@ -70,17 +66,13 @@ def run_group_qc(config, job_ids=None):
     print(f"[QSIRECON-GROUP-QC] Performing QC metric concatenation in (background) interactive mode")
     cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
            f'--partition={mriqc["partition"]} '
-           f'--mem={mriqc["requested_mem"]}gb '
+           f'--mem={mriqc["requested_mem"]} '
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_group_xcpd_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_group_xcpd_%j.err ')
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
-    cmd += (
-        f'\necho "Running QC metric concatenation"\n'
-        f'python3 rsfmri/qc_xcpd.py '
-        f"'{json.dumps(config)}' 'group'\n"
-    )
+    cmd += f"python3 rsfmri/qc_xcpd.py '{json.dumps(config)}' group &"
     os.system(cmd)
 
 

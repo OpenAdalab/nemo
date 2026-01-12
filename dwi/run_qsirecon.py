@@ -77,7 +77,7 @@ def generate_slurm_script(config, subject, session, path_to_script, job_ids=None
         f'#SBATCH -p {qsirecon["partition"]}\n'
         f'#SBATCH --gpus-per-node={qsirecon["gpu_per_node"]}\n'
         f'#SBATCH --nodes=1\n'
-        f'#SBATCH --mem={qsirecon["requested_mem"]}\n'
+        f'#SBATCH --mem={qsirecon["requested_mem"]}gb\n'
         f'#SBATCH -t {qsirecon["requested_time"]}\n'
         f'#SBATCH -e {DERIVATIVES_DIR}/qsirecon/stdout/%x_job-%j.err\n'
         f'#SBATCH -o {DERIVATIVES_DIR}/qsirecon/stdout/%x_job-%j.out\n'

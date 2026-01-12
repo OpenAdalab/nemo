@@ -87,7 +87,7 @@ def generate_slurm_xcpd_script(config, subject, session, path_to_script, job_ids
         f'#SBATCH --job-name=xcpd_{subject}_{session}\n'
         f'#SBATCH --output={DERIVATIVES_DIR}/xcpd/stdout/xcpd_{subject}_{session}_%j.out\n'
         f'#SBATCH --error={DERIVATIVES_DIR}/xcpd/stdout/xcpd_{subject}_{session}_%j.err\n'
-        f'#SBATCH --mem={xcpd["requested_mem"]}\n'
+        f'#SBATCH --mem={xcpd["requested_mem"]}gb\n'
         f'#SBATCH --time={xcpd["requested_time"]}\n'
         f'#SBATCH --partition={xcpd["partition"]}\n'
     )

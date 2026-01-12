@@ -76,7 +76,7 @@ def generate_slurm_script(config, subject, session, path_to_script, data_type="r
         f'#SBATCH --job-name=mriqc_{data_type}_{subject}_{session}\n'
         f'#SBATCH --output={DERIVATIVES_DIR}/qc/{data_type}/stdout/mriqc_{data_type}_{subject}_{session}_%j.out\n'
         f'#SBATCH --error={DERIVATIVES_DIR}/qc/{data_type}/stdout/mriqc_{data_type}_{subject}_{session}_%j.err\n'
-        f'#SBATCH --mem={mriqc["requested_mem"]}\n'
+        f'#SBATCH --mem={mriqc["requested_mem"]}gb\n'
         f'#SBATCH --time={mriqc["requested_time"]}\n'
         f'#SBATCH --partition={mriqc["partition"]}\n'
     )
