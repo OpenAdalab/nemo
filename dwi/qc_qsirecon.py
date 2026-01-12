@@ -35,9 +35,10 @@ def run_participant_qc(config, subject, session, job_ids=None):
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
     # Call to python scripts for the rest of QC
-    cmd += f"python3 dwi/qc_qsirecon.py '{json.dumps(config)}' participant {subject} {session} &"
-    os.system(cmd)
-    return 0
+    cmd += f"echo 'Job ID = $SLURM_JOB_ID' ; python3 dwi/qc_qsirecon.py '{json.dumps(config)}' participant {subject} {session} &"
+    job_id = utils.submit_job(cmd, 'interactive')  # todo: faire pareil pour les autres
+
+    return job_id
 
 
 def run_group_qc(config, job_ids=None):

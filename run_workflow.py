@@ -272,11 +272,11 @@ def main(config_file=None):
         #     job_ids=dependencies
         # )
 
-        # QC group-level for qsiprep data
-        # -------------------------------------------
-        print(f"[QSIPREP-GROUP-QC]")
-        dependencies = [job_id for job_id in qc_qsiprep_job_ids if job_id is not None]
-        qc_qsiprep.run_group_qc(config, job_ids=dependencies)
+        # # QC group-level for qsiprep data
+        # # -------------------------------------------
+        # print(f"[QSIPREP-GROUP-QC]")
+        # dependencies = [job_id for job_id in qc_qsiprep_job_ids if job_id is not None]
+        # qc_qsiprep.run_group_qc(config, job_ids=dependencies)
 
         # QC group-level for qsirecon data
         # -------------------------------------------

@@ -133,7 +133,7 @@ def has_func_fmap(input_dir, subject):
         (Path(input_dir) / subject).glob("**/fmap/*"))
 
 
-def submit_job(cmd):
+def submit_job(cmd, mode='batch'):
     """
     Submits a SLURM job using the provided command and returns the job ID.
 
@@ -160,9 +160,12 @@ def submit_job(cmd):
         output = result.stdout.strip()
 
         # Parse the output to extract the job ID
-        if output.startswith("Submitted batch job"):
+        if mode=='batch' and output.startswith("Submitted batch job"):
             job_id = output.split()[-1]
             print(f"SLURM job successfully submitted: ID {job_id}")
+            return job_id
+        elif mode=='interactive' and output.startswith("Job ID"):
+            job_id = output.split()[-1]
             return job_id
         else:
             print("Unable to retrieve the SLURM job ID.")
