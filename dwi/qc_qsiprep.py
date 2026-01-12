@@ -67,7 +67,7 @@ def run_group_qc(config, job_ids=None):
            f'--err={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_group_qsiprep_%j.err ')
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
-    cmd += f"python3 dwi/qc_qsiprep.py {json.dumps(config)} group &"
+    cmd += f"python3 dwi/qc_qsiprep.py '{json.dumps(config)}' group &"
     os.system(cmd)
 
 
