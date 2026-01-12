@@ -31,7 +31,8 @@ def run_participant_qc(config, subject, session, job_ids=None):
            f'--mem={mriqc["requested_mem"]} '
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_qsirecon_{subject}_{session}_%j.out '
-           f'--err={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_qsirecon_{subject}_{session}_%j.err ')
+           f'--err={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_qsirecon_{subject}_{session}_%j.err '
+           f'--export=ALL')
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
     # Call to python scripts for the rest of QC

@@ -9,6 +9,7 @@ from pathlib import Path
 import nibabel as nib
 import warnings
 import json
+
 warnings.filterwarnings("ignore")
 
 
@@ -161,11 +162,11 @@ def submit_job(cmd, mode='batch'):
         print(output)
 
         # Parse the output to extract the job ID
-        if mode=='batch' and output.startswith("Submitted batch job"):
+        if mode == 'batch' and output.startswith("Submitted batch job"):
             job_id = output.split()[-1]
             print(f"SLURM job successfully submitted: ID {job_id}")
             return job_id
-        elif mode=='interactive':
+        elif mode == 'interactive':
             job_id = output.split()[-1]
             return job_id
         else:
@@ -218,7 +219,6 @@ def extract_runtime(content):
 
 
 def read_log(config, subject, session, runtype):
-
     finished_status = "Error"
     runtime = 0
 
