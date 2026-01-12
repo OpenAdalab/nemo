@@ -158,13 +158,14 @@ def submit_job(cmd, mode='batch'):
         # Execute the sbatch command and capture the output
         result = subprocess.run(cmd, shell=True, check=True, text=True, capture_output=True)
         output = result.stdout.strip()
+        print(output)
 
         # Parse the output to extract the job ID
         if mode=='batch' and output.startswith("Submitted batch job"):
             job_id = output.split()[-1]
             print(f"SLURM job successfully submitted: ID {job_id}")
             return job_id
-        elif mode=='interactive' and output.startswith("Job ID"):
+        elif mode=='interactive':
             job_id = output.split()[-1]
             return job_id
         else:
