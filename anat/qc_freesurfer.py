@@ -349,7 +349,7 @@ def run(config, job_ids=None):
 
     cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
            f'--partition={fsqc["partition"]} '
-           f'--mem={fsqc["requested_mem"]}gb '
+           f'--mem={fsqc["requested_mem"]} '
            f'--time={fsqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/freesurfer/stdout/qc_freesurfer_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/freesurfer/stdout/qc_freesurfer_%j.err ')

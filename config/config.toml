@@ -136,6 +136,6 @@ mriqc_container = "/scratch/lhashimoto/mriqc-24.0.2.sif"
 mriqc_config = "/scratch/lhashimoto/code/nemo/config/mriqc_config.toml"
 bids_filter_dir = "/scratch/lhashimoto/code/nemo/rsfmri/bids_filters"
 partition = "skylake"
-requested_mem = "64G"
+requested_mem = "64"
 requested_time = "3:00:00"
 skip_processed = true
