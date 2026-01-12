@@ -38,6 +38,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
     # Call to python scripts for the rest of QC
     cmd += f"echo JobID=$SLURM_JOB_ID ; python3 dwi/qc_qsirecon.py '{json.dumps(config)}' participant {subject} {session} &"
     job_id = utils.submit_job(cmd, 'interactive')  # todo: faire pareil pour les autres
+    print(job_id)
 
     return job_id
 
