@@ -168,6 +168,7 @@ def submit_job(cmd, mode='batch'):
             return job_id
         elif mode == 'interactive':
             job_id = output.split()[-1]
+            print(job_id)
             return job_id
         else:
             print("Unable to retrieve the SLURM job ID.")
