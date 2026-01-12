@@ -61,11 +61,7 @@ def run_group_qc(config, job_ids=None):
            f'--err={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_group_qsirecon_%j.err ')
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
-    cmd += (
-        f'\necho "Running QC metric concatenation"\n'
-        f'python3 dwi/qc_qsirecon.py '
-        f"'{json.dumps(config)}' 'group'\n"
-    )
+    cmd += f"'python3 dwi/qc_qsirecon.py {json.dumps(config)} 'group'"
     os.system(cmd)
 
 

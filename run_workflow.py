@@ -259,16 +259,18 @@ def main(config_file=None):
     # 7. GROUP-LEVEL QC
     # -------------------------------------------------------
     if workflow.get("run_group_qc"):
-        # QC group-level for raw data
-        # -------------------------------------------
-        print(f"[MRIQC-GROUP] (raw data)")
-        dependencies = [job_id for job_id in mriqc_job_ids if job_id is not None]
-        run_mriqc_group(
-            config,
-            input_dir=BIDS_DIR,
-            data_type="raw",
-            job_ids=dependencies
-        )
+        # print(f"\n================ Group-level QC ================\n")
+        #
+        # # QC group-level for raw data
+        # # -------------------------------------------
+        # print(f"[MRIQC-GROUP] (raw data)")
+        # dependencies = [job_id for job_id in mriqc_job_ids if job_id is not None]
+        # run_mriqc_group(
+        #     config,
+        #     input_dir=BIDS_DIR,
+        #     data_type="raw",
+        #     job_ids=dependencies
+        # )
 
         # QC group-level for qsiprep data
         # -------------------------------------------

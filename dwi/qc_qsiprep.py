@@ -54,7 +54,7 @@ def run_group_qc(config, job_ids=None):
     mriqc = config["mriqc"]
 
     # Run group-level MRIQC
-    run_mriqc_group(config, f"{DERIVATIVES_DIR}/qsiprep/outputs", data_type="qsiprep", job_ids=job_ids)
+    # run_mriqc_group(config, f"{DERIVATIVES_DIR}/qsiprep/outputs", data_type="qsiprep", job_ids=job_ids)
 
     # Run in interactive mode to avoid using resources on the connection front
     # It is also mandatory to ensure correct orchestration and wait for previous jobs to be terminated
@@ -67,11 +67,7 @@ def run_group_qc(config, job_ids=None):
            f'--err={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_group_qsiprep_%j.err ')
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
-    cmd += (
-        f'\necho "Running QC metric concatenation"\n'
-        f'python3 dwi/qc_qsiprep.py '
-        f"'{json.dumps(config)}' 'group'\n"
-    )
+    cmd += f"'python3 dwi/qc_qsiprep.py {json.dumps(config)} 'group' &"
     os.system(cmd)
 
 

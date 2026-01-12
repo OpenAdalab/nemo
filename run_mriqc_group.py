@@ -9,7 +9,7 @@ import utils
 # ------------------------
 # Create SLURM job scripts 
 # ------------------------
-def generate_slurm_mriqc_script(config, input_dir, path_to_script, data_type="raw", job_ids=None):
+def generate_slurm_script(config, input_dir, path_to_script, data_type="raw", job_ids=None):
     """Generate the SLURM job script for MRIQC group processing.
     Parameters
     ----------
@@ -103,7 +103,7 @@ def run_mriqc_group(config, input_dir, data_type="raw", job_ids=None):
     DERIVATIVES_DIR = config["common"]["derivatives"]
 
     path_to_script = f"{DERIVATIVES_DIR}/qc/{data_type}/scripts/group_mriqc_{data_type}.slurm"
-    generate_slurm_mriqc_script(config, input_dir, data_type=data_type, path_to_script=path_to_script, job_ids=job_ids)
+    generate_slurm_script(config, input_dir, data_type=data_type, path_to_script=path_to_script, job_ids=job_ids)
 
     cmd = f"sbatch {path_to_script}"
     job_id = utils.submit_job(cmd)
