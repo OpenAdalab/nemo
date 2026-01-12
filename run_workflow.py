@@ -105,7 +105,7 @@ def main(config_file=None):
             # -------------------------------------------
             # 0. MRIQC on raw BIDS data
             # -------------------------------------------
-            if workflow.get("run_mriqc_raw"):
+            if workflow.get("run_raw_qc"):
                 print("[MRIQC-RAW] (raw data)")
                 mriqc_raw_job_id = run_mriqc(
                     config,
@@ -258,7 +258,7 @@ def main(config_file=None):
     # -------------------------------------------------------
     # 7. GROUP-LEVEL QC
     # -------------------------------------------------------
-    if workflow.get("run_qc_group"):
+    if workflow.get("run_group_qc"):
         # QC group-level for raw data
         # -------------------------------------------
         print(f"[MRIQC-GROUP] (raw data)")

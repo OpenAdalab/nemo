@@ -4,7 +4,7 @@
 [common]
 input_dir = "/scratch/lhashimoto/nemo_database/imaging_data"
 derivatives = "/scratch/lhashimoto/nemo_derivatives"
-subjects = []  #["1054001","1054002","1054003","1054004","1054010"] #["1054002"]
+subjects = ["1054001","1054002","1054003","1054004","1054010"] #["1054002"]
 sessions = ["01"]
 freesurfer_license = "/scratch/lhashimoto/freesurfer/license"
 python_env = "/scratch/lhashimoto/python/env/nemo"
@@ -31,13 +31,13 @@ run_qsiprep = false
 run_qsirecon = false
 run_fmriprep = false
 run_xcp_d = false
-run_mriqc_raw = false
+run_raw_qc = true
 run_freesurfer_qc = false
 run_qsiprep_qc = false
 run_qsirecon_qc = false
 run_fmriprep_qc = false
 run_xcpd_qc = false
-run_qc_group = true
+run_group_qc = true
 
 # =============================
 #   PIPELINE: FreeSurfer
