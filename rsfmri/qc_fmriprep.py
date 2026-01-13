@@ -45,6 +45,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
     # Run participant-level MRIQC
     # print(f"[QC-FMRIPREP] Submitting MRIQC job")
     # mriqc_job_id = run_mriqc(config, subject, session, data_type="fmriprep", job_ids=job_ids)
+    mriqc_job_id = None
 
     print(f"[QC-FMRIPREP] Submitting QC metric extraction in (background) interactive mode")
     cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
