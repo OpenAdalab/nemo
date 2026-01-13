@@ -60,7 +60,6 @@ def generate_slurm_script(config, input_dir, path_to_script, data_type="raw", jo
         f'    --cleanenv \\\n'
         f'    -B {input_dir}:/data:ro \\\n'
         f'    -B {DERIVATIVES_DIR}/qc/{data_type}:/out \\\n'
-        f'    -B {mriqc["bids_filter_dir"]}:/bids_filter_dir \\\n'
         f'    {mriqc["mriqc_container"]} /data /out/outputs group \\\n'
         f'    --mem {mriqc["requested_mem"]} \\\n'
         f'    -w /out/work \\\n'
@@ -70,7 +69,7 @@ def generate_slurm_script(config, input_dir, path_to_script, data_type="raw", jo
         f'    --testing \\\n'
         f'    --no-sub --notrack\n'
     )
-    # todo: besoin du bids_filter_file ?
+
     save_work = (
         f'\nmv {DERIVATIVES_DIR}/qc/{data_type}/outputs/group* {DERIVATIVES_DIR}/qc/{data_type}/\n'
         f'\nchmod -Rf 771 {DERIVATIVES_DIR}/qc/{data_type}\n'
