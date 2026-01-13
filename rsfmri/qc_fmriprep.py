@@ -149,13 +149,10 @@ def metric_extraction(config, subject, session):
             # Load data
             t1w_img = utils.load_any_image(t1w)
             t1w_data = t1w_img.get_fdata()
-            del t1w_img
             t1w_mask_img = utils.load_any_image(t1w_mask)
             t1w_mask_data = t1w_mask_img.get_fdata()
-            del t1w_mask_img
             bold_img = utils.load_any_image(bold)
             bold_data = bold_img.get_fdata()
-            del bold_img
 
             # Compute mean BOLD image
             mean_bold = np.mean(bold_data, axis=3)
@@ -163,19 +160,15 @@ def metric_extraction(config, subject, session):
             # Load masks for voxel counts
             bold_mask_img = utils.load_any_image(bold_mask)
             bold_mask_data = bold_mask_img.get_fdata()
-            del bold_mask_img
             t1w_brain = t1w_data * t1w_mask_data
             bold_brain = mean_bold * bold_mask_data
 
             gm_img = utils.load_any_image(gm)
             gm_mask = gm_img.get_fdata() > 0.5
-            del gm_img
             wm_img = utils.load_any_image(wm)
             wm_mask = wm_img.get_fdata() > 0.5
-            del wm_img
             csf_img = utils.load_any_image(csf)
             csf_mask = csf_img.get_fdata() > 0.5
-            del csf_img
 
             # Resample bold into t1w space
             bold_brain_hr = utils.resample(bold_brain, t1w_data)
