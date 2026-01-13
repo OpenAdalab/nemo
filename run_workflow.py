@@ -260,17 +260,17 @@ def main(config_file=None):
     # -------------------------------------------------------
     if workflow.get("run_group_qc"):
         print(f"\n================ Group-level QC ================\n")
-        #
-        # # QC group-level for raw data
-        # # -------------------------------------------
-        # print(f"[MRIQC-GROUP] (raw data)")
-        # dependencies = [job_id for job_id in mriqc_job_ids if job_id is not None]
-        # run_mriqc_group(
-        #     config,
-        #     input_dir=BIDS_DIR,
-        #     data_type="raw",
-        #     job_ids=dependencies
-        # )
+
+        # QC group-level for raw data
+        # -------------------------------------------
+        print(f"[MRIQC-GROUP] (raw data)")
+        dependencies = [job_id for job_id in mriqc_job_ids if job_id is not None]
+        run_mriqc_group(
+            config,
+            input_dir=BIDS_DIR,
+            data_type="raw",
+            job_ids=dependencies
+        )
 
         # # QC group-level for qsiprep data
         # # -------------------------------------------
@@ -278,11 +278,11 @@ def main(config_file=None):
         # dependencies = [job_id for job_id in qc_qsiprep_job_ids if job_id is not None]
         # qc_qsiprep.run_group_qc(config, job_ids=dependencies)
 
-        # QC group-level for qsirecon data
-        # -------------------------------------------
-        print(f"[QSIRECON-GROUP-QC]")
-        dependencies = [job_id for job_id in qc_qsirecon_job_ids if job_id is not None]
-        qc_qsirecon.run_group_qc(config, job_ids=dependencies)
+        # # QC group-level for qsirecon data
+        # # -------------------------------------------
+        # print(f"[QSIRECON-GROUP-QC]")
+        # dependencies = [job_id for job_id in qc_qsirecon_job_ids if job_id is not None]
+        # qc_qsirecon.run_group_qc(config, job_ids=dependencies)
 
         # # QC group-level for fmriprep data
         # # -------------------------------------------

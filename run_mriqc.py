@@ -153,14 +153,12 @@ def generate_slurm_script(config, subject, session, path_to_script, data_type="r
         f'    --fd_thres 0.5 \\\n'
         f'    --verbose-reports \\\n'
         f'    --verbose \\\n'
+        f'    --testing \\\n'
         f'    --no-sub --notrack\n'
     )
 
     save_work = (
-        f'\necho "Cleaning up temporary work directory..."\n'
         f'\nchmod -Rf 771 {DERIVATIVES_DIR}/qc/{data_type}\n'
-        # f'\ncp -r $TMP_WORK_DIR/* {DERIVATIVES_DIR}/mriqc_{data_type}/work\n'
-        f'echo "Finished MRIQC for subject: {subject}, session: {session}"\n'
     )
 
     # Write the complete SLURM script to the specified file
