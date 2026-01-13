@@ -50,6 +50,7 @@ def run_group_qc(config, job_ids=None):
     mriqc = config["mriqc"]
 
     # Run group-level MRIQC
+    print(f"[QSIPREP-GROUP-QC] Submitting MRIQC job")
     run_mriqc_group(config, f"{DERIVATIVES_DIR}/qsiprep/outputs", data_type="qsiprep", job_ids=job_ids)
 
     # Run in interactive mode to avoid using resources on the connection front

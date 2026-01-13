@@ -35,8 +35,8 @@ run_raw_qc = false
 run_freesurfer_qc = false
 run_qsiprep_qc = false
 run_qsirecon_qc = false
-run_fmriprep_qc = false
-run_xcpd_qc = false
+run_fmriprep_qc = true
+run_xcpd_qc = true
 run_group_qc = true
 
 # =============================

@@ -43,8 +43,8 @@ def run_participant_qc(config, subject, session, job_ids=None):
         return None
 
     # Run participant-level MRIQC
-    print(f"[QC-FMRIPREP] Submitting MRIQC job")
-    mriqc_job_id = run_mriqc(config, subject, session, data_type="fmriprep", job_ids=job_ids)
+    # print(f"[QC-FMRIPREP] Submitting MRIQC job")
+    # mriqc_job_id = run_mriqc(config, subject, session, data_type="fmriprep", job_ids=job_ids)
 
     print(f"[QC-FMRIPREP] Submitting QC metric extraction in (background) interactive mode")
     cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
@@ -69,6 +69,7 @@ def run_group_qc(config, job_ids=None):
     mriqc = config["mriqc"]
 
     # Run group-level MRIQC
+    print(f"[FMRIPREP-GROUP-QC] Submitting MRIQC job")
     run_mriqc_group(config, f"{DERIVATIVES_DIR}/fmriprep/outputs", data_type="fmriprep", job_ids=job_ids)
 
     # Run in interactive mode to avoid using resources on the connection front
