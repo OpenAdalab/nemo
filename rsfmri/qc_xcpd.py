@@ -52,7 +52,6 @@ def run_participant_qc(config, subject, session, job_ids=None):
     # Call to python scripts for the rest of QC
     cmd += f"python3 rsfmri/qc_xcpd.py '{json.dumps(config)}' participant {subject} {session} &"
     os.system(cmd)
-    return 0
 
 
 def run_group_qc(config, job_ids=None):
