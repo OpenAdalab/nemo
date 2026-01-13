@@ -2,25 +2,23 @@
 #   PROJECT-WIDE SETTINGS
 # =============================
 [common]
-#input_dir = "/scratch/lhashimoto/nemo_database/imaging_data"
-#derivatives = "/scratch/lhashimoto/nemo_derivatives"
-#subjects = ["1054001"]  #["1054001","1054002","1054004","1054010"] #["1054002"]
-#sessions = ["01"]
-#freesurfer_license = "/scratch/lhashimoto/freesurfer/license"
-#python_env = "/scratch/lhashimoto/python/env/nemo"
-#account = ""
-#email = ""
-#email_frequency = "FAIL" # BEGIN,END
-
-input_dir = "/scratch/hrasoanandrianina/braint_database"  # "/scratch/lhashimoto/nemo_database/imaging_data"
-derivatives = "/scratch/lhashimoto/braint_derivatives"  # ""/scratch/lhashimoto/nemo_derivatives"
-subjects = ["003"]
-sessions = ["01"] #, "02"]
+container_dir = "/scratch/lhashimoto"
 freesurfer_license = "/scratch/lhashimoto/freesurfer/license"
 python_env = "/scratch/lhashimoto/python/env/nemo"
 account = ""
 email = ""
 email_frequency = "FAIL" # BEGIN,END
+## NEMO DATABASE
+input_dir = "/scratch/lhashimoto/nemo_database/imaging_data"
+derivatives = "/scratch/lhashimoto/nemo_derivatives"
+subjects = ["1054001"]  #["1054001","1054002","1054004","1054010"]
+sessions = ["01"]
+## BRAINT DATABASE
+#input_dir = "/scratch/hrasoanandrianina/braint_database"
+#derivatives = "/scratch/lhashimoto/braint_derivatives"
+#subjects = ["003"]
+#sessions = ["01"] #, "02"]
+
 
 # =============================
 #   WORKFLOW SETTINGS
