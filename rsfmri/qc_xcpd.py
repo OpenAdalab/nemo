@@ -30,7 +30,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
     mriqc = config["mriqc"]
 
     if not is_xcpd_done(config, subject, session):
-        print(f"[QC-XCPD] XCP-D did not terminate for {subject} {session}. Please run XCP-D command before QC.")
+        print(f"[XCPD-QC] XCP-D did not terminate for {subject} {session}. Please run XCP-D command before QC.")
         return None
 
     # Create output (derivatives) directories
@@ -40,7 +40,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
 
     # Run in interactive mode to avoid using resources on the connection front
     # It is also mandatory to ensure correct orchestration and wait for previous jobs to be terminated
-    print(f"[QC-XCPD] Submitting QC metric extraction in (background) interactive mode")
+    print(f"[XCPD-QC] Submitting QC metric extraction in (background) interactive mode")
     cmd = (f'\nsrun --job-name=py_qc_xcpd --ntasks=1 '
            f'--partition={mriqc["partition"]} '
            f'--mem={mriqc["requested_mem"]} '
@@ -62,7 +62,7 @@ def run_group_qc(config, job_ids=None):
 
     # Run in interactive mode to avoid using resources on the connection front
     # It is also mandatory to ensure correct orchestration and wait for previous jobs to be terminated
-    print(f"[QSIRECON-GROUP-QC] Performing QC metric concatenation in (background) interactive mode")
+    print(f"[XCPD-GROUP-QC] Performing QC metric concatenation in (background) interactive mode")
     cmd = (f'\nsrun --job-name=py_qc_xcpd --ntasks=1 '
            f'--partition={mriqc["partition"]} '
            f'--mem={mriqc["requested_mem"]} '

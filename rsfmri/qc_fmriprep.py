@@ -39,7 +39,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
     mriqc = config["mriqc"]
 
     if not is_fmriprep_done(config, subject, session):
-        print(f"[QC-FMRIPREP] FMRIPrep did not terminate for {subject} {session}. Please run FMRIPrep command before QC.")
+        print(f"[FMRIPREP-QC] FMRIPrep did not terminate for {subject} {session}. Please run FMRIPrep command before QC.")
         return None
 
     # Run participant-level MRIQC
@@ -47,7 +47,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
     # mriqc_job_id = run_mriqc(config, subject, session, data_type="fmriprep", job_ids=job_ids)
     mriqc_job_id = None
 
-    print(f"[QC-FMRIPREP] Submitting QC metric extraction in (background) interactive mode")
+    print(f"[FMRIPREP-QC] Submitting QC metric extraction in (background) interactive mode")
     cmd = (f'\nsrun --job-name=py_qc_fmriprep --ntasks=1 '
            f'--partition={mriqc["partition"]} '
            f'--mem={mriqc["requested_mem"]} '
