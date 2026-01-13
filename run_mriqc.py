@@ -137,7 +137,7 @@ def generate_slurm_script(config, subject, session, path_to_script, data_type="r
         MRIQC_INPUT = BIDS_DIR
     else:
         MRIQC_INPUT = f"{DERIVATIVES_DIR}/{data_type}/outputs"
-    # todo: remove testing
+
     singularity_cmd = (
         f'\napptainer run \\\n'
         f'    --cleanenv \\\n'
@@ -153,7 +153,6 @@ def generate_slurm_script(config, subject, session, path_to_script, data_type="r
         f'    --fd_thres 0.5 \\\n'
         f'    --verbose-reports \\\n'
         f'    --verbose \\\n'
-        f'    --testing \\\n'
         f'    --no-sub --notrack\n'
     )
 

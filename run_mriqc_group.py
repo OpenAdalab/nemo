@@ -66,7 +66,6 @@ def generate_slurm_script(config, input_dir, path_to_script, data_type="raw", jo
         f'    --fd_thres 0.5 \\\n'
         f'    --verbose-reports \\\n'
         f'    --verbose \\\n'
-        f'    --testing \\\n'
         f'    --no-sub --notrack\n'
     )
 
