@@ -37,7 +37,7 @@ run_qsiprep_qc = false
 run_qsirecon_qc = false
 run_fmriprep_qc = true
 run_xcpd_qc = false
-run_group_qc = true
+run_group_qc = false
 
 # =============================
 #   PIPELINE: FreeSurfer
@@ -136,6 +136,6 @@ mriqc_container = "/scratch/lhashimoto/mriqc-24.0.2.sif"
 mriqc_config = "/scratch/lhashimoto/code/nemo/config/mriqc_config.toml"
 bids_filter_dir = "/scratch/lhashimoto/code/nemo/rsfmri/bids_filters"
 partition = "skylake"
-requested_mem = "90"
+requested_mem = "32"
 requested_time = "3:00:00"
 skip_processed = true
