@@ -41,7 +41,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
     # Run in interactive mode to avoid using resources on the connection front
     # It is also mandatory to ensure correct orchestration and wait for previous jobs to be terminated
     print(f"[QC-XCPD] Submitting QC metric extraction in (background) interactive mode")
-    cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
+    cmd = (f'\nsrun --job-name=py_qc_xcpd --ntasks=1 '
            f'--partition={mriqc["partition"]} '
            f'--mem={mriqc["requested_mem"]} '
            f'--time={mriqc["requested_time"]} '
@@ -63,7 +63,7 @@ def run_group_qc(config, job_ids=None):
     # Run in interactive mode to avoid using resources on the connection front
     # It is also mandatory to ensure correct orchestration and wait for previous jobs to be terminated
     print(f"[QSIRECON-GROUP-QC] Performing QC metric concatenation in (background) interactive mode")
-    cmd = (f'\nsrun --job-name=fsqc --ntasks=1 '
+    cmd = (f'\nsrun --job-name=py_qc_xcpd --ntasks=1 '
            f'--partition={mriqc["partition"]} '
            f'--mem={mriqc["requested_mem"]} '
            f'--time={mriqc["requested_time"]} '
