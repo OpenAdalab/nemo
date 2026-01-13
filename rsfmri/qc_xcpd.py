@@ -43,7 +43,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
     print(f"[XCPD-QC] Submitting QC metric extraction in (background) interactive mode")
     cmd = (f'\nsrun --job-name=py_qc_xcpd --ntasks=1 '
            f'--partition={mriqc["partition"]} '
-           f'--mem={mriqc["requested_mem"]} '
+           f'--mem={mriqc["requested_mem"]}gb '
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_xcpd_{subject}_{session}_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_xcpd_{subject}_{session}_%j.err ')
@@ -65,7 +65,7 @@ def run_group_qc(config, job_ids=None):
     print(f"[XCPD-GROUP-QC] Performing QC metric concatenation in (background) interactive mode")
     cmd = (f'\nsrun --job-name=py_qc_xcpd --ntasks=1 '
            f'--partition={mriqc["partition"]} '
-           f'--mem={mriqc["requested_mem"]} '
+           f'--mem={mriqc["requested_mem"]}gb '
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_group_xcpd_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/xcpd/stdout/qc_group_xcpd_%j.err ')

@@ -28,7 +28,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
     print(f"[QSIRECON-QC] Submitting QC metric extraction in (background) interactive mode")
     cmd = (f'\nsrun --job-name=py_qc_qsirecon --ntasks=1 '
            f'--partition={mriqc["partition"]} '
-           f'--mem={mriqc["requested_mem"]} '
+           f'--mem={mriqc["requested_mem"]}gb '
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_qsirecon_{subject}_{session}_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_qsirecon_{subject}_{session}_%j.err ')
@@ -50,7 +50,7 @@ def run_group_qc(config, job_ids=None):
     print(f"[QSIRECON-GROUP-QC] Performing QC metric concatenation in (background) interactive mode")
     cmd = (f'\nsrun --job-name=py_qc_qsirecon --ntasks=1 '
            f'--partition={mriqc["partition"]} '
-           f'--mem={mriqc["requested_mem"]} '
+           f'--mem={mriqc["requested_mem"]}gb '
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_group_qsirecon_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/qsirecon/stdout/qc_group_qsirecon_%j.err ')

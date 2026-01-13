@@ -78,7 +78,7 @@ def run_group_qc(config, job_ids=None):
     print(f"[FMRIPREP-GROUP-QC] Performing QC metric concatenation in (background) interactive mode")
     cmd = (f'\nsrun --job-name=py_qc_fmriprep --ntasks=1 '
            f'--partition={mriqc["partition"]} '
-           f'--mem={mriqc["requested_mem"]} '
+           f'--mem={mriqc["requested_mem"]}gb '
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/fmriprep/stdout/qc_group_fmriprep_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/fmriprep/stdout/qc_group_fmriprep_%j.err ')
