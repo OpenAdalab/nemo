@@ -41,7 +41,7 @@ def detect_container_tool() -> str:
 
 def run_command(cmd: list[str]):
     """Run a shell command and stream output."""
-    print(f"\n[SETUP] RUUNING {' '.join(cmd)}")
+    print(f"\n[SETUP] RUNNING {' '.join(cmd)}")
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     for line in process.stdout: # type: ignore
         print(f"[{cmd[0]}] {line.strip()}")

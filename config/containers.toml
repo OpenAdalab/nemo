@@ -1,5 +1,9 @@
 directory = "/scratch/lhashimoto/containers"
 
+[containers.freesurfer]
+versions = ["7.4.1"]
+docker_repo = "freesurfer/freesurfer"
+
 [containers.fmriprep]
 versions = ["23.2.0", "25.2.0"]
 docker_repo = "nipreps/fmriprep"
@@ -8,9 +12,13 @@ docker_repo = "nipreps/fmriprep"
 versions = ["0.12.0"]
 docker_repo = "pennlinc/xcp_d"
 
-[containers.freesurfer]
-versions = ["7.4.1"]
-docker_repo = "freesurfer/freesurfer"
+[containers.qsiprep]
+versions = ["1.0.2"]
+docker_repo = "pennlinc/qsiprep"
+
+[containers.qsirecon]
+versions = ["1.1.1"]
+docker_repo = "pennlinc/qsirecon"
 
 [containers.fsqc]
 versions = ["2.1.4"]

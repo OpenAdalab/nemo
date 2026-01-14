@@ -2,7 +2,7 @@
 #   PROJECT-WIDE SETTINGS
 # =============================
 [common]
-freesurfer_license = "/scratch/lhashimoto/freesurfer/license"
+freesurfer_license = "/scratch/lhashimoto/freesurfer/license"  # Directory containing license file
 python_env = "/scratch/lhashimoto/python/env/nemo"
 account = ""
 email = ""
