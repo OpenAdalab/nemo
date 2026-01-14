@@ -14,8 +14,23 @@ import numpy as np
 
 def read_log(log_file):
     """
-    Uses regex to extract information from the log file such as the runtime, the number of Euler number before and after topological correction
+    Reads and parses a FreeSurfer log file to extract runtime and Euler number information.
 
+    Parameters
+    ----------
+    log_file : str
+        Path to the FreeSurfer log file.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - finished_status (str): "Success" if the process finished without error, otherwise "Error".
+        - runtime (str): The runtime in hours, or "Not found" if unavailable.
+        - eno_before_lh (float): Euler number before topological correction for the left hemisphere.
+        - eno_before_rh (float): Euler number before topological correction for the right hemisphere.
+        - eno_after_lh (float): Euler number after topological correction for the left hemisphere.
+        - eno_after_rh (float): Euler number after topological correction for the right hemisphere.
     """
 
     if not os.path.exists(log_file):
@@ -56,9 +71,23 @@ def read_log(log_file):
 
 def convert_radians_to_degrees(df):
     """
-    Convert radians to degrees for rotation angles.
-    Save results in new columns.
+    Converts rotation angles from radians to degrees in a given DataFrame.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        A DataFrame containing columns 'rot_tal_x', 'rot_tal_y', and 'rot_tal_z'
+        with rotation angles in radians.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The input DataFrame with three new columns:
+        - 'rot_tal_x_deg': Rotation angle in degrees for 'rot_tal_x'.
+        - 'rot_tal_y_deg': Rotation angle in degrees for 'rot_tal_y'.
+        - 'rot_tal_z_deg': Rotation angle in degrees for 'rot_tal_z'.
     """
+
     df["rot_tal_x_deg"] = df["rot_tal_x"].apply(lambda x: x * 180 / 3.14)
     df["rot_tal_y_deg"] = df["rot_tal_y"].apply(lambda x: x * 180 / 3.14)
     df["rot_tal_z_deg"] = df["rot_tal_z"].apply(lambda x: x * 180 / 3.14)
@@ -68,14 +97,23 @@ def convert_radians_to_degrees(df):
 def normalize_aseg_volumes(freesurfer_dir, subjects_sessions, columns_to_extract,
                            ETIV='aseg.EstimatedTotalIntraCranialVol'):
     """
-    Extract ETIV value for each subject.
-    Normalize ASEG volumes by EstimatedTotalIntraCranialVol and save it in a csv file.
+    Normalizes aseg volumes by the Estimated Total Intracranial Volume (ETIV) for a list of subjects/sessions.
 
-    :param subjects:
-    :param subjects_dir:
-    :param columns_to_exclude: columns that are not volumes
-    :param columns_to_skip: basically ETIV column and other columns to merge in the final dataframe
-    :return:
+    Parameters
+    ----------
+    freesurfer_dir : str
+        Path to the FreeSurfer directory containing subject_session data.
+    subjects_sessions : list of str
+        List of subject/session identifiers.
+    columns_to_extract : list of str
+        List of column names to extract for quality control (QC).
+    ETIV : str, optional
+        Column name for the Estimated Total Intracranial Volume (default is 'aseg.EstimatedTotalIntraCranialVol').
+
+    Returns
+    -------
+    pandas.DataFrame
+        A DataFrame containing the extracted QC columns for all subjects/sessions.
     """
 
     df_qc = []
@@ -101,6 +139,7 @@ def normalize_aseg_volumes(freesurfer_dir, subjects_sessions, columns_to_extract
 
 
 def calculate_outliers(freesurfer_dir, subjects_sessions, outlier_dir, outlier_params):
+
     """
     Adapted from fsqc.fsqcMain.py (line 2726).
     Compute outliers for each subject compared to the sample for the following values :
@@ -114,7 +153,29 @@ def calculate_outliers(freesurfer_dir, subjects_sessions, outlier_dir, outlier_p
     uncomment the n_outlier_norms line The function outlierDetection_normalized is also adapted from the original
     function. This one reads the normalized aseg stats from the csv files (aseg_stats_norm.csv).
 
-    :return:
+    Parameters
+    ----------
+    freesurfer_dir : str
+        Path to the FreeSurfer directory containing subject_session data.
+    subjects_sessions : list of str
+        List of subject/session identifiers.
+    outlier_dir : str
+        Path to the directory where outlier results will be saved.
+    outlier_params : dict
+        Dictionary of parameters for outlier detection, including:
+        - 'min_no_subjects' (int): Minimum number of subjects required for analysis.
+        - 'hypothalamus' (bool): Whether to include hypothalamus substructures in the analysis.
+        - 'hippocampus' (bool): Whether to include hippocampus substructures in the analysis.
+        - 'hippocampus_label' (str): Label for hippocampus substructures.
+        - 'fastsurfer' (bool): Whether to use FastSurfer outputs.
+        - 'outlierDict' (dict or None): Custom dictionary of outlier thresholds.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - df_group_stats (pandas.DataFrame): Group statistics for aparc/aseg metrics.
+        - df_outliers (pandas.DataFrame): Outlier counts for each subject/session.
     """
     print("---------------------------------------")
     print("Running outlier detection")
@@ -177,19 +238,22 @@ def calculate_outliers(freesurfer_dir, subjects_sessions, outlier_dir, outlier_p
 
 def compute_metrics(config, subjects_sessions):
     """
-    Note : Note
-    that a minimum of 5 supplied subjects is required for running outlier analyses,
+    Computes various quality control (QC) metrics for FreeSurfer outputs, including log verification,
+    volume normalization, and outlier detection.
+    Note : Note that a minimum of 5 supplied subjects is required for running outlier analyses,
     otherwise NaNs will be returned.
 
     Parameters
     ----------
-    args
-    subject
-    session
+    config : dict
+        Configuration dictionary containing paths and QC parameters.
+    subjects_sessions : list of str
+        List of subject/session identifiers to process.
 
     Returns
     -------
-
+    None
+        The function performs QC computations and saves the results to CSV files in the specified output directory.
     """
 
     common = config["common"]
@@ -259,6 +323,10 @@ def compute_metrics(config, subjects_sessions):
 
 
 def generate_bash_script(config, subjects_sessions, path_to_script):
+    """
+    Generates a BASH script to run FreeSurfer QC and other quality control processes.
+
+    """
 
     common = config["common"]
     fsqc = config["fsqc"]
@@ -326,6 +394,27 @@ def generate_bash_script(config, subjects_sessions, path_to_script):
 
 def run(config, job_ids=None):
     """
+    Runs the FreeSurfer Quality Control (QC) pipeline.
+
+    This function sets up the necessary directories, generates a BASH script for QC processes,
+    and submits the QC job to the system. The QC includes FreeSurfer outputs verification,
+    volume normalization, and outlier detection. The job can be submitted with dependencies
+    on other jobs if `job_ids` are provided.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing paths and QC parameters.
+    job_ids : list of str, optional
+        List of job IDs that the current job depends on. The QC job will start only after these jobs are completed.
+
+    Returns
+    -------
+    None
+        The function sets up the QC pipeline and submits the job to the system.
+    """
+
+    """
     Run FreeSurfer QC
     Note that FSQC must run on interactive mode to be able to display (and save) graphical outputs
     """
@@ -368,6 +457,7 @@ def run(config, job_ids=None):
 
 
 if __name__ == "__main__":
+
     import sys
     config = json.loads(sys.argv[1])
     subjects_sessions = sys.argv[2].split(',')
