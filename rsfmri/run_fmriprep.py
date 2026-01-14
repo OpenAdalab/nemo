@@ -157,7 +157,7 @@ def generate_slurm_fmriprep_script(config, subject, session, path_to_script, fs_
         f'    -B {DERIVATIVES_DIR}/fmriprep:/out \\\n'
         f'    -B {common["freesurfer_license"]}/license.txt:/opt/freesurfer/license.txt \\\n'
         f'    -B {fmriprep["fmriprep_config"]}:/config/fmriprep_config.toml \\\n'
-        f'    -B {fmriprep["bids_filter_dir"]}:/bids_filter_dir \\\n'
+        f'    -B {common["bids_filter_dir"]}:/bids_filter_dir \\\n'
         f'    {fmriprep["fmriprep_container"]} /data /out/outputs participant \\\n'
         f'    --participant-label {subject} \\\n'
         f'    --session-label {session} \\\n'

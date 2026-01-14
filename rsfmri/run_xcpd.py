@@ -140,7 +140,7 @@ def generate_slurm_xcpd_script(config, subject, session, path_to_script, job_ids
         f'    -B {DERIVATIVES_DIR}/fmriprep/outputs:/data:ro \\\n'
         f'    -B {DERIVATIVES_DIR}/xcpd:/out \\\n'
         f'    -B {common["freesurfer_license"]}/license.txt:/opt/freesurfer/license.txt \\\n'
-        f'    -B {xcpd["bids_filter_dir"]}:/bids_filter_dir\\\n'
+        f'    -B {common["bids_filter_dir"]}:/bids_filter_dir\\\n'
         f'    -B {xcpd["xcpd_config"]}:/config/xcpd_config.toml \\\n'
         f'    {xcpd["xcpd_container"]} /data /out/outputs participant \\\n'
         f'      --input-type fmriprep \\\n'

@@ -1,8 +1,0 @@
-{
-    "bold": {
-        "datatype": "func",
-        "session": "02",
-        "task": ["01RestingCross","09RestingCross"],
-        "suffix": "bold"
-    }
-}

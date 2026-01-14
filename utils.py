@@ -71,7 +71,7 @@ def get_sessions(input_dir, subject, specified_sessions=None):
 
 def get_tasks(session):
     # Read bids_filter file to get the list of tasks to consider
-    bids_filter_path = Path(__file__).resolve().parent / "rsfmri" / "bids_filters" / f"bids_filter_{session}.json"
+    bids_filter_path = Path(__file__).resolve().parent / "bids_filters" / f"bids_filter_{session}.json"
     if not bids_filter_path.is_file():
         raise FileNotFoundError(f"BIDS filter file {bids_filter_path} not found.")
     with open(bids_filter_path, 'r') as f:

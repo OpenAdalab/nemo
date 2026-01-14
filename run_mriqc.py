@@ -143,7 +143,7 @@ def generate_slurm_script(config, subject, session, path_to_script, data_type="r
         f'    --cleanenv \\\n'
         f'    -B {MRIQC_INPUT}:/data:ro \\\n'
         f'    -B {DERIVATIVES_DIR}/qc/{data_type}:/out \\\n'
-        f'    -B {mriqc["bids_filter_dir"]}:/bids_filter_dir \\\n'
+        f'    -B {common["bids_filter_dir"]}:/bids_filter_dir \\\n'
         f'    {mriqc["mriqc_container"]} /data /out/outputs participant \\\n'
         f'    --participant_label {subject} \\\n'
         f'    --session-id {session} \\\n'

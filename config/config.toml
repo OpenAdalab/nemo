@@ -17,7 +17,7 @@ sessions = ["01"]
 #derivatives = "/scratch/lhashimoto/braint_derivatives"
 #subjects = ["003"]
 #sessions = ["01"] #, "02"]
-
+bids_filter_dir = "/scratch/lhashimoto/code/nemo/bids_filters"
 
 # =============================
 #   WORKFLOW SETTINGS
@@ -101,7 +101,6 @@ skip_processed = true
 [fmriprep]
 fmriprep_container = "/scratch/lhashimoto/fmriprep-25.2.2.sif"
 fmriprep_config = "/scratch/lhashimoto/code/nemo/config/fmriprep_config.toml"
-bids_filter_dir = "/scratch/lhashimoto/code/nemo/rsfmri/bids_filters"
 subject_anatomical_reference = "sessionwise"
 cifti_outputs = "91k"
 reserved_cpus = 8
@@ -117,7 +116,6 @@ skip_processed = true
 [xcpd]
 xcpd_container = "/scratch/lhashimoto/xcpd-0.12.0.sif"
 xcpd_config = "/scratch/lhashimoto/code/nemo/config/xcpd_config.toml"
-bids_filter_dir = "/scratch/lhashimoto/code/nemo/rsfmri/bids_filters"
 partition = "skylake"
 requested_mem = "64"
 requested_time = "8:00:00"
@@ -131,7 +129,6 @@ skip_processed = true
 [mriqc]
 mriqc_container = "/scratch/lhashimoto/mriqc-24.0.2.sif"
 mriqc_config = "/scratch/lhashimoto/code/nemo/config/mriqc_config.toml"
-bids_filter_dir = "/scratch/lhashimoto/code/nemo/rsfmri/bids_filters"
 partition = "skylake"
 requested_mem = "64"
 requested_time = "3:00:00"
