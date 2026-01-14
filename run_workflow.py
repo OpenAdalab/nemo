@@ -298,4 +298,15 @@ def main(config_file=None):
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Exécute le workflow de neuroimagerie avec un fichier de configuration.")
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=None,
+        help="Chemin vers le fichier de configuration TOML."
+    )
+    args = parser.parse_args()
+
+    main(config_file=args.config)
