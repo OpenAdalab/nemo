@@ -1,4 +1,4 @@
-directory = "/scratch/lhashimoto"
+directory = "/scratch/lhashimoto/containers"
 
 [containers.fmriprep]
 versions = ["23.2.0", "25.2.0"]
