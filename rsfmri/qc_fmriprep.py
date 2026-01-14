@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import json
-import warnings
 import os
 import sys
 import numpy as np
@@ -11,7 +10,6 @@ import utils
 from rsfmri.run_fmriprep import is_already_processed as is_fmriprep_done
 from run_mriqc import run_mriqc
 from run_mriqc_group import run_mriqc_group
-warnings.filterwarnings("ignore")
 
 
 def run_participant_qc(config, subject, session, job_ids=None):
@@ -43,9 +41,8 @@ def run_participant_qc(config, subject, session, job_ids=None):
         return None
 
     # Run participant-level MRIQC
-    # print(f"[QC-FMRIPREP] Submitting MRIQC job")
-    # mriqc_job_id = run_mriqc(config, subject, session, data_type="fmriprep", job_ids=job_ids)
-    mriqc_job_id = None
+    print(f"[QC-FMRIPREP] Submitting MRIQC job")
+    mriqc_job_id = run_mriqc(config, subject, session, data_type="fmriprep", job_ids=job_ids)
 
     print(f"[FMRIPREP-QC] Submitting QC metric extraction in (background) interactive mode")
     cmd = (f'\nsrun --job-name=py_qc_fmriprep --ntasks=1 '
