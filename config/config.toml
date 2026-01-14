@@ -2,7 +2,6 @@
 #   PROJECT-WIDE SETTINGS
 # =============================
 [common]
-container_dir = "/scratch/lhashimoto"
 freesurfer_license = "/scratch/lhashimoto/freesurfer/license"
 python_env = "/scratch/lhashimoto/python/env/nemo"
 account = ""

@@ -312,7 +312,7 @@ def main(config_file=None):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Exécute le workflow de neuroimagerie avec un fichier de configuration.")
+    parser = argparse.ArgumentParser(description="Exécute le workflow avec un fichier de configuration.")
     parser.add_argument(
         "--config",
         type=str,

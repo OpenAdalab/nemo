@@ -1,0 +1,24 @@
+directory = "/scratch/lhashimoto"
+
+[containers.fmriprep]
+versions = ["23.2.0", "25.2.0"]
+docker_repo = "nipreps/fmriprep"
+
+[containers.xcp_d]
+versions = ["0.12.0"]
+docker_repo = "pennlinc/xcp_d"
+
+[containers.freesurfer]
+versions = ["7.4.1"]
+docker_repo = "freesurfer/freesurfer"
+
+[containers.fsqc]
+versions = ["2.1.4"]
+docker_repo = "deepmi/fsqcdocker"
+
+[containers.mriqc]
+versions = ["24.0.2"]
+docker_repo = "nipreps/mriqc"
+
+
+
