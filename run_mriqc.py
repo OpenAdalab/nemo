@@ -15,6 +15,8 @@ def is_already_processed(config, subject, session, data_type="raw"):
 
     Parameters
     ----------
+    config : dict
+        Full pipeline configuration.
     subject : str
         Subject identifier (e.g., "sub-01").
     session : str
@@ -52,14 +54,19 @@ def is_already_processed(config, subject, session, data_type="raw"):
 # Create SLURM job script for MRIQC
 # ------------------------
 def generate_slurm_script(config, subject, session, path_to_script, data_type="raw", job_ids=None):
-    """Generate the SLURM job script.
+    """
+    Generate the SLURM script for MRIQC.
+
     Parameters
     ----------
-   
+    config : dict
+        Full pipeline configuration.
     subject : str
         Subject identifier.
     session : str
         Session identifier.
+    path_to_script : str
+        Full path where the SLURM script will be saved.
     data_type : str
         Type of data to process (e.g., "raw" or "fmriprep" or "qsiprep").
     job_ids : list, optional
@@ -174,9 +181,12 @@ def generate_slurm_script(config, subject, session, path_to_script, data_type="r
 # ------------------------------
 def run_mriqc(config, subject, session, data_type="raw", job_ids=None):
     """
-    Run the MRIQC for a given subject and session.
+    Run MRIQC for a given subject and session.
+
     Parameters
     ----------
+    config : dict
+        Full pipeline configuration.
     subject : str
         Subject identifier.
     session : str

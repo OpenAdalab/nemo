@@ -10,17 +10,23 @@ import utils
 # Create SLURM job scripts 
 # ------------------------
 def generate_slurm_script(config, input_dir, path_to_script, data_type="raw", job_ids=None):
-    """Generate the SLURM job script for MRIQC group processing.
+    """
+    Generate the SLURM job script for MRIQC group processing.
+
     Parameters
     ----------
-   
+    config : dict
+        Full pipeline configuration.
     input_dir : str
         Input directory path.
+    path_to_script : str
+        Full path where the SLURM script will be saved.
     data_type : str
         Type of data to process (e.g., "raw" or "fmriprep" or "qsiprep").
     job_ids : list, optional
         List of SLURM job IDs to set as dependencies (default is None).
     """
+
     common = config["common"]
     mriqc = config["mriqc"]
     DERIVATIVES_DIR = common["derivatives"]
@@ -84,9 +90,12 @@ def generate_slurm_script(config, input_dir, path_to_script, data_type="raw", jo
 # ------------------------------
 def run_mriqc_group(config, input_dir, data_type="raw", job_ids=None):
     """
-    Run the MRIQC for a given input directory.
+    Run Group-level MRIQC for a given input directory.
+
     Parameters
     ----------
+    config : dict
+        Full pipeline configuration.
     input_dir : str
         Input directory containing the data to be processed.
     data_type : str

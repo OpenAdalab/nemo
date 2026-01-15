@@ -46,7 +46,26 @@ def check_prerequisites(config, subject, session):
 
 
 def is_already_processed(config, subject, session, clear_fs=False):
+    """
+    Check if FreeSurfer has already processed the given subject/session successfully.
 
+    Parameters
+    ----------
+    config : dict
+        Pipeline configuration dictionary (must contain 'common' -> 'derivatives').
+    subject : str
+        Subject identifier (e.g., 'sub-01').
+    session : str
+        Session identifier (e.g., 'ses-01').
+    clear_fs : bool, optional
+        If True and the previous run did not finish without error, remove the existing
+        FreeSurfer output directory.
+
+    Returns
+    -------
+    bool
+        True if 'recon-all-status.log' contains 'finished without error', False otherwise.
+    """
     # Check if freesurfer already processed without error
     DERIVATIVES_DIR = config["common"]["derivatives"]
 

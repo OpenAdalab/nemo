@@ -24,7 +24,10 @@ import utils
 # HELPER FUNCTIONS
 # ========================
 def detect_container_tool() -> str:
-    """Detect whether Apptainer or Singularity is installed."""
+    """
+    Detect whether Apptainer or Singularity is installed.
+    """
+
     if shutil.which("apptainer"):
         print("[SETUP] Using Apptainer as container runtime.")
         return "apptainer"
@@ -40,7 +43,10 @@ def detect_container_tool() -> str:
 
 
 def run_command(cmd: list[str]):
-    """Run a shell command and stream output."""
+    """
+    Run a shell command and stream output.
+    """
+
     print(f"\n[SETUP] RUNNING {' '.join(cmd)}")
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     for line in process.stdout: # type: ignore
@@ -51,7 +57,10 @@ def run_command(cmd: list[str]):
 
 
 def pull_image(tool: str, name: str, version: str, repo: str, out_dir: Path):
-    """Pull the image using Apptainer or Singularity."""
+    """
+    Pull the image using Apptainer or Singularity.
+    """
+
     sif_name = f"{name}_{version}.sif"
     sif_path = out_dir / sif_name
     docker_uri = f"docker://{repo}:{version}"
@@ -72,9 +81,30 @@ def pull_image(tool: str, name: str, version: str, repo: str, out_dir: Path):
 
 
 def main(config_file):
-    # -------------------------------
-    # Load configuration
-    # -------------------------------
+    """
+    Main entry point to pull Apptainer/Singularity images based on a TOML config.
+
+    Parameters
+    ----------
+    config_file : str | None
+        Path to the TOML configuration file. If None, a default path
+        (`<script_dir>/config/containers.toml`) is used.
+
+    Behavior
+    --------
+    - Loads configuration using `utils.load_config`.
+    - Detects available container runtime ('apptainer' or 'singularity').
+    - Ensures the target container directory exists.
+    - Pulls each requested image (skips if already present) and optionally
+      inspects the resulting SIF files.
+
+    Exceptions
+    ----------
+    - Exits with a user-friendly message when no supported runtime is found.
+    - Raises `RuntimeError` if a pull command fails.
+    - `subprocess.CalledProcessError` may be raised by the inspect command.
+    """
+
     if not config_file:
         config_file = f"{Path(__file__).parent}/config/containers.toml"
     config = utils.load_config(config_file)

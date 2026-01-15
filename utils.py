@@ -70,6 +70,26 @@ def get_sessions(input_dir, subject, specified_sessions=None):
 
 
 def get_tasks(session):
+    """
+    Load the list of BIDS tasks for a given session from a JSON bids filter.
+
+    Parameters
+    ----------
+    session : str
+        Session identifier used to build the bids filter filename; the function
+        will look for `bids_filters/bids_filter_{session}.json` next to this file.
+
+    Returns
+    -------
+    list
+        List of task names (strings). If the JSON contains a single string the
+        function converts it to a list.
+
+    Notes
+    -----
+    Expects the JSON structure to contain a `bold` key with a `task` field,
+    for example: {"bold": {"task": "rest"}} or {"bold": {"task": ["rest", "task2"]}}.
+    """
     # Read bids_filter file to get the list of tasks to consider
     bids_filter_path = Path(__file__).resolve().parent / "bids_filters" / f"bids_filter_{session}.json"
     if not bids_filter_path.is_file():
@@ -86,24 +106,15 @@ def get_tasks(session):
 def subject_exists(input_dir, subject):
     """
     Check if the subject directory exists in the input directory.
-    
-    :param input_dir: Description
-    :param subject: Description
-    :return: Description
-    
-    """
 
+    """
     return (Path(input_dir) / subject).exists()
 
 
 def has_anat(input_dir, subject):
     """
     Check if the subject has anatomical data.
-    
-    :param input_dir: Description
-    :param subject: Description
-    :return: Description
-    
+
     """
     return any((Path(input_dir) / subject).glob("**/anat/*T1w.nii*"))
 
@@ -111,11 +122,7 @@ def has_anat(input_dir, subject):
 def has_dwi(input_dir, subject):
     """
     Check if the subject has diffusion-weighted imaging (DWI) data.
-    
-    :param input_dir: Description
-    :param subject: Description
-    :return: Description
-    
+
     """
     return any((Path(input_dir) / subject).glob("**/dwi/*dwi.nii*"))
 
@@ -123,11 +130,7 @@ def has_dwi(input_dir, subject):
 def has_func_fmap(input_dir, subject):
     """
     Check if the subject has functional MRI data along with field maps.
-    
-    :param input_dir: Description
-    :param subject: Description
-    :return: Description
-    
+
     """
     return any((Path(input_dir) / subject).glob("**/func/*bold.nii*")) and any(
         (Path(input_dir) / subject).glob("**/fmap/*"))
@@ -176,6 +179,7 @@ def submit_job(cmd):
 def count_dirs(directory):
     """
     Count the number of directories recursively inside the given directory
+
     """
     if not os.path.isdir(directory):
         return 0
@@ -185,6 +189,7 @@ def count_dirs(directory):
 def count_files(directory):
     """
     Count the number of files recursively inside the given directory
+
     """
     if os.path.isdir(directory):
         return sum([len(files) for _, _, files in os.walk(directory)])
@@ -193,6 +198,18 @@ def count_files(directory):
 
 
 def extract_runtime(content):
+    """
+    Extract runtime (in hours) from log file content.
+
+    Searches for timestamps matching the pattern ``YYMMDD-HH:MM:SS`` inside the given
+    text, parses the first and last occurrences, and returns the elapsed time in hours.
+
+    Parameters
+    ----------
+    content : str
+        Log file content as a single string.
+
+    """
     # Expression régulière pour capturer les timestamps
     timestamp_pattern = r"\d{6}-\d{2}:\d{2}:\d{2}"
 
@@ -214,6 +231,34 @@ def extract_runtime(content):
 
 
 def read_log(config, subject, session, runtype):
+    """
+    Read SLURM stdout log(s) for a given subject/session/runtype and determine
+    whether the pipeline finished successfully and how long it ran.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing at least the key
+        `config["common"]["derivatives"]` pointing to the derivatives' directory.
+    subject : str
+        Subject identifier (e.g. "sub-01").
+    session : str
+        Session identifier (e.g. "ses-01").
+    runtype : str
+        Pipeline name used to build stdout filename prefix (e.g. "fmriprep",
+        "xcpd", "qsiprep", "qsirecon", "mriqc").
+
+    Returns
+    -------
+    tuple
+        A tuple (finished_status, runtime_hours):
+        - finished_status : str
+            "Success" if the expected success string is found in any matching
+            stdout file, otherwise "Error".
+        - runtime_hours : float
+            Elapsed runtime in hours extracted from the first and last
+            timestamp occurrences in the log (0 if not found or on error).
+    """
     finished_status = "Error"
     runtime = 0
 
@@ -256,27 +301,9 @@ def read_log(config, subject, session, runtype):
     return finished_status, runtime
 
 
-# def is_mriqc_done(config, subject, session, runtype):
-#     """
-#     Checks if MRIQC processing is done for a given subject and session.
-#     """
-#
-#     DERIVATIVES_DIR = config["common"]["derivatives"]
-#     stdout_dir = f"{DERIVATIVES_DIR}/qc/{runtype}/stdout"
-#     prefix = f"qc_{runtype}_{subject}_{session}"
-#     if os.path.exists(stdout_dir):
-#         stdout_files = [f for f in os.listdir(stdout_dir) if (f.startswith(prefix) and f.endswith('.out'))]
-#         for file in stdout_files:
-#             file_path = os.path.join(stdout_dir, file)
-#             with open(file_path, 'r') as f:
-#                 if 'MRIQC completed' in f.read():
-#                     return True
-#     return False
-
-
 def load_any_image(path: Path) -> np.ndarray:
     """
-    Load an fMRIPrep/XCP-D output image, handling both NIfTI and GIFTI formats.
+    Load an image with nibabel, handling both NIfTI and GIFTI formats.
 
     Parameters
     ----------
@@ -327,6 +354,21 @@ def dice(a, b):
 
 
 def resample(low_res_image, high_res_image):
+    """
+    Resample a lower-resolution 3D image to match the shape of a higher-resolution image.
+
+    Parameters
+    ----------
+    low_res_image : numpy.ndarray
+        Source image array to be resampled (expected 3D).
+    high_res_image : numpy.ndarray
+        Reference image whose shape defines the target voxel grid.
+
+    Returns
+    -------
+    numpy.ndarray
+        Resampled image with the same shape as `high_res_image`.
+    """
     from scipy.ndimage import zoom
 
     target_shape = high_res_image.shape  # Cible : la résolution de l'image de plus haute résolution
@@ -339,6 +381,28 @@ def resample(low_res_image, high_res_image):
 
 
 def mutual_information(image1, image2, bins=64):
+    """
+    Compute mutual information (in bits) between two images.
+
+    Parameters
+    ----------
+    image1 : numpy.ndarray
+        First input image. Values will be normalized to the range [0, 1]
+        using the image's own min/max.
+    image2 : numpy.ndarray
+        Second input image. Must be comparable to image1 (same shape is typical).
+    bins : int, optional
+        Number of bins used to estimate the joint histogram (default 64).
+
+    Returns
+    -------
+    float
+        Estimated mutual information (log base 2). If histograms are degenerate
+        (e.g. constant images) the computed value may be 0. Note that the
+        function normalizes each image by (max - min) without guarding against
+        zero range; calling code should ensure inputs are not constant or handle
+        the potential division by zero.
+    """
     # Normaliser les images entre 0 et 1
     image1 = (image1 - image1.min()) / (image1.max() - image1.min())
     image2 = (image2 - image2.min()) / (image2.max() - image2.min())

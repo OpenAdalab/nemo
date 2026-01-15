@@ -14,7 +14,10 @@ from run_mriqc_group import run_mriqc_group
 
 def run_participant_qc(config, subject, session, job_ids=None):
     """
-    Run the qc_fmriprep for a given subject and session.
+    Run participant-level QC pipeline for a single subject/session.
+
+    Checks that FMRIprep completed; submits participant-level MRIQC and launches
+    a background interactive `srun` to execute QC metric extraction.
 
     Parameters
     ----------
@@ -26,6 +29,7 @@ def run_participant_qc(config, subject, session, job_ids=None):
         Session identifier.
     job_ids : list, optional
         List of SLURM job IDs to set as dependencies (default is None).
+
     Returns
     -------
     str or None
@@ -61,6 +65,24 @@ def run_participant_qc(config, subject, session, job_ids=None):
 
 
 def run_group_qc(config, job_ids=None):
+    """
+    Run group-level QC: submit group MRIQC and launch background interactive concatenation.
+
+    Submits the group-level MRIQC job using ``run_mriqc_group`` and then starts an
+    interactive background ``srun`` process to perform QC metric concatenation.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing at least ``common`` and ``mriqc`` sections.
+    job_ids : list or None, optional
+        List of job IDs to depend on (used to set ``--dependency=afterok``), by default None.
+
+    Returns
+    -------
+    None
+        Operates via side effects (submitting jobs and writing outputs to the derivatives QC folders).
+    """
 
     common = config["common"]
     DERIVATIVES_DIR = common["derivatives"]
@@ -96,8 +118,7 @@ def metric_extraction(config, subject, session):
     ----------
     config : dict
         Configuration dictionary.
-    fmriprep_dir : Path
-        Path to the fMRIPrep derivatives directory.
+
     Returns
     -------
     pd.DataFrame
@@ -214,6 +235,27 @@ def metric_extraction(config, subject, session):
 
 
 def metric_concatenation(config):
+    """
+        Concatenate participant-level QC CSV files produced by `metric_extraction` into a
+        single group-level CSV for fMRIPrep.
+
+        The function:
+        - Scans the fMRIPrep outputs directory for all subjects and sessions.
+        - For each subject/session/task, looks for the per-task QC CSV saved by
+          `metric_extraction`.
+        - Reads existing CSVs and concatenates them into a single DataFrame.
+        - Writes the concatenated table to `DERIVATIVES_DIR/qc/fmriprep/group_minimal_qc.csv`.
+
+        Parameters
+        ----------
+        config : dict
+            Configuration dictionary. Must contain `common` with a `derivatives` key
+            pointing to the derivatives directory.
+
+        Returns
+        -------
+        None
+        """
 
     DERIVATIVES_DIR = config["common"]["derivatives"]
 

@@ -9,7 +9,27 @@ from dwi.run_qsirecon import is_already_processed as is_qsirecon_done
 
 
 def run_participant_qc(config, subject, session, job_ids=None):
+    """
+    Run participant-level QC pipeline for a single subject/session.
 
+    Checks that QSIrecon completed and launches
+    a background interactive `srun` to execute QC metric extraction.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing at least `common` and `mriqc` sections.
+    subject : str
+        BIDS subject label (e.g. `sub-01`).
+    session : str
+        Session label (e.g. `ses-01`).
+    job_ids : list or None, optional
+        List of job IDs to depend on (used to set `--dependency=afterok`), by default None.
+
+    Returns
+    -------
+    None
+    """
     common = config["common"]
     DERIVATIVES_DIR = common["derivatives"]
     mriqc = config["mriqc"]
@@ -40,7 +60,23 @@ def run_participant_qc(config, subject, session, job_ids=None):
 
 
 def run_group_qc(config, job_ids=None):
+    """
+    Run group-level QC: launch background interactive concatenation.
 
+    Starts an interactive background ``srun`` process to perform QC metric concatenation.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing at least ``common`` and ``mriqc`` sections.
+    job_ids : list or None, optional
+        List of job IDs to depend on (used to set ``--dependency=afterok``), by default None.
+
+    Returns
+    -------
+    None
+        Operates via side effects (submitting jobs and writing outputs to the derivatives QC folders).
+    """
     common = config["common"]
     DERIVATIVES_DIR = common["derivatives"]
     mriqc = config["mriqc"]
@@ -65,16 +101,25 @@ def run_group_qc(config, job_ids=None):
 # ------------------------------------------
 def metric_extraction(config, subject, session):
     """
-    Extract QC metrics from QSIPrep outputs.
+    Extract QC metrics for a single subject/session from QSIrecon outputs.
+
+    This function:
+    - reads process status and runtime from QSIrecon logs via `utils.read_log`
+    - counts output directories and files in the subject/session output folder
 
     Parameters
     ----------
     config : dict
-        Configuration dictionary.
+        Configuration dictionary containing at least the `common` section with
+        a `derivatives` path.
+    subject : str
+        Subject identifier (e.g., 'sub-01').
+    session : str
+        Session identifier (e.g., 'ses-01').
+
     Returns
     -------
-    pd.DataFrame
-        DataFrame containing QC metrics for each subject and session.
+    None
     """
 
     DERIVATIVES_DIR = config["common"]["derivatives"]
@@ -110,7 +155,20 @@ def metric_extraction(config, subject, session):
 
 
 def metric_concatenation(config):
+    """
+    Concatenate per-subject/session QSIrecon QC CSV files into a single group-level CSV.
 
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing at least the ``common`` section with
+        a ``derivatives`` path.
+
+    Returns
+    -------
+    None
+        Writes `group_minimal_qc.csv` into the `derivatives/qc/qsirecon` folder
+    """
     DERIVATIVES_DIR = config["common"]["derivatives"]
 
     qc_inhouse = []

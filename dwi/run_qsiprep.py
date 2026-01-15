@@ -8,7 +8,7 @@ import utils
 def is_already_processed(config, subject, session):
     """
     Check if subject_session is already processed successfully.
-    Note: Even if QSIprep put files in cache, some steps are recomputed which require several hours of ressources.
+    Note: Even if QSIprep put files in cache, some steps are recomputed which require several hours of resources.
 
     Parameters
     ----------
@@ -50,19 +50,23 @@ def is_already_processed(config, subject, session):
 
 def generate_slurm_script(config, subject, session, path_to_script, job_ids=None):
     """
-    Generate the SLURM script for QSIprep processing.
+    Generate the SLURM script to run QSIprep
 
     Parameters
     ----------
+    config : dict
+        Full pipeline configuration.
     subject : str
-        Subject identifier.
+        Subject identifier (e.g., `sub-01`).
     session : str
-        Session identifier.
+        Session identifier (e.g., `ses-01`).
     path_to_script : str
-        Path where the SLURM script will be saved.
-    job_ids : list, optional
-        List of SLURM job IDs to set as dependencies (default is None).
+        Full path where the SLURM script will be saved.
+    job_ids : list[str] or None, optional
+        List of SLURM job IDs to set as dependencies (format `12345`), or `None`.
+
     """
+
 
     common = config["common"]
     qsiprep = config["qsiprep"]
@@ -135,16 +139,18 @@ def generate_slurm_script(config, subject, session, path_to_script, job_ids=None
 
 def run_qsiprep(config, subject, session, job_ids=None):
     """
-    Run the QSIprep for a given subject and session.
+    Run QSIprep for a given subject and session.
 
     Parameters
     ----------
-    job_ids : list, optional
-        List of SLURM job IDs to set as dependencies (default is None).
+    config : dict
+        Full pipeline configuration.
     subject : str
         Subject identifier.
     session : str
         Session identifier.
+    job_ids : list, optional
+        List of SLURM job IDs to set as dependencies (default is None).
 
     Returns
     -------

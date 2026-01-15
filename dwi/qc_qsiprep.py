@@ -13,6 +13,28 @@ from dwi.run_qsiprep import is_already_processed as is_qsiprep_done
 
 
 def run_participant_qc(config, subject, session, job_ids=None):
+    """
+    Run participant-level QC pipeline for a single subject/session.
+
+    Checks that QSIprep completed; submits participant-level MRIQC and launches
+    a background interactive `srun` to execute QC metric extraction.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing at least `common` and `mriqc` sections.
+    subject : str
+        BIDS subject label (e.g. `sub-01`).
+    session : str
+        Session label (e.g. `ses-01`).
+    job_ids : list or None, optional
+        List of job IDs to depend on (used to set `--dependency=afterok`), by default None.
+
+    Returns
+    -------
+    str or None
+        The submitted MRIQC job id on success; `None` if QSIprep did not finish.
+    """
     common = config["common"]
     DERIVATIVES_DIR = common["derivatives"]
     mriqc = config["mriqc"]
@@ -44,6 +66,24 @@ def run_participant_qc(config, subject, session, job_ids=None):
 
 
 def run_group_qc(config, job_ids=None):
+    """
+    Run group-level QC: submit group MRIQC and launch background interactive concatenation.
+
+    Submits the group-level MRIQC job using ``run_mriqc_group`` and then starts an
+    interactive background ``srun`` process to perform QC metric concatenation.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing at least ``common`` and ``mriqc`` sections.
+    job_ids : list or None, optional
+        List of job IDs to depend on (used to set ``--dependency=afterok``), by default None.
+
+    Returns
+    -------
+    None
+        Operates via side effects (submitting jobs and writing outputs to the derivatives QC folders).
+    """
 
     common = config["common"]
     DERIVATIVES_DIR = common["derivatives"]
@@ -73,12 +113,13 @@ def run_group_qc(config, job_ids=None):
 # ------------------------------------------
 def metric_extraction(config, subject, session):
     """
-    Extract QC metrics from fMRIPrep outputs.
+    Extract QC metrics from QSIPrep outputs.
 
     Parameters
     ----------
     config : dict
         Configuration dictionary.
+
     Returns
     -------
     pd.DataFrame
@@ -179,6 +220,32 @@ def metric_extraction(config, subject, session):
 
 
 def metric_concatenation(config):
+    """
+    Concatenate participant-level QC metrics produced for QSIPrep into group-level CSVs.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing at least the `common` section with the
+        `derivatives` path. This path is used to locate participant-level outputs.
+
+    Behavior
+    --------
+    - Scans `DERIVATIVES_DIR/qsiprep/outputs` for subjects and sessions.
+    - For each subject/session, attempts to read:
+      - the in-house QC CSV at
+        `DERIVATIVES_DIR/qc/qsiprep/outputs/{subject}/{session}/{subject}_{session}_qc.csv`
+      - the QSIPrep image QC TSV at
+        `DERIVATIVES_DIR/qsiprep/outputs/{subject}/{session}/dwi/*_desc-image_qc.tsv`
+    - Concatenates available participant-level files into:
+      - `DERIVATIVES_DIR/qc/qsiprep/group_minimal_qc.csv` (in-house QC)
+      - `DERIVATIVES_DIR/qc/qsiprep/group_qsiprep_image_qc.csv` (QSIPrep image QC)
+    - Missing participant files are skipped; the function operates via side effects.
+
+    Returns
+    -------
+    None
+    """
 
     DERIVATIVES_DIR = config["common"]["derivatives"]
 

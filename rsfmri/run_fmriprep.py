@@ -10,6 +10,27 @@ import utils
 # HELPERS
 # ------------------------------
 def check_prerequisites(config, subject, session):
+    """
+    Check required input data exists for the given subject and session.
+
+    This function verifies that the BIDS dataset contains at least one anatomical
+    image and one functional image (with fieldmaps when expected) for the
+    specified subject and session.
+
+    Parameters
+    ----------
+    config : dict
+        Project configuration containing a `common` section with `input_dir`.
+    subject : str
+        Subject identifier (e.g., 'sub-01').
+    session : str
+        Session identifier (e.g., 'ses-01').
+
+    Returns
+    -------
+    bool
+        True if prerequisites are met, False otherwise.
+    """
     # Check required files
     BIDS_DIR = config["common"]["input_dir"]
     if not utils.has_anat(BIDS_DIR, subject):
@@ -67,40 +88,23 @@ def is_already_processed(config, subject, session):
 # ------------------------
 # Create SLURM job scripts 
 # ------------------------
-def generate_slurm_fmriprep_script(config, subject, session, path_to_script, fs_done=False, job_ids=None):
-    """Generate a SLURM job script for fMRIPrep processing.
-    This function creates a SLURM submission script that runs fMRIPrep via Singularity/Apptainer
-    container. The script includes setup for temporary directories, FreeSurfer dependency checking,
-    module loading, and cleanup procedures.
+def generate_slurm_script(config, subject, session, path_to_script, job_ids=None):
+    """
+    Generate a SLURM job script for fMRIPrep processing.
+
+    Parameters
+    ----------
     config : dict
-        Configuration dictionary containing 'common' and 'fmriprep' sections with settings for
-        input/output directories, container paths, SLURM parameters, and resource requirements.
-        Subject identifier (e.g., 'sub-001').
-        Session identifier (e.g., 'ses-01').
-        File path where the generated SLURM script will be saved.
-    fs_done : bool, optional
-        Deprecated parameter indicating FreeSurfer completion status (default is False).
-        Currently unused but retained for backward compatibility.
-    job_ids : list of str, optional
-        List of SLURM job IDs to set as dependencies using 'afterok' constraint.
-        If provided, this job will wait for those jobs to complete successfully (default is None).
-    Returns
-    -------
-    None
-        Writes the SLURM script directly to the file specified by path_to_script and prints
-        a confirmation message.
-    Raises
-    ------
-    IOError
-        If the script cannot be written to path_to_script.
-    Notes
-    -----
-    The generated script performs the following steps:
-    - Loads required modules (Singularity/Apptainer)
-    - Checks FreeSurfer preprocessing completion before starting fMRIPrep
-    - Sets up a temporary work directory (using SLURM_TMPDIR or TMPDIR)
-    - Runs fMRIPrep container with specified output spaces and configurations
-    - Handles output directory permissions and work file consolidation
+        Full pipeline configuration.
+    subject : str
+        Subject identifier (e.g., `sub-01`).
+    session : str
+        Session identifier (e.g., `ses-01`).
+    path_to_script : str
+        Full path where the SLURM script will be saved.
+    job_ids : list[str] or None, optional
+        List of SLURM job IDs to set as dependencies (format `12345`), or `None`.
+
     """
 
     common = config["common"]
@@ -192,9 +196,12 @@ def generate_slurm_fmriprep_script(config, subject, session, path_to_script, fs_
 
 def run_fmriprep(config, subject, session, job_ids=None):
     """
-    Run the FMRIPrep for a given subject and session.
+    Run FMRIPrep for a given subject and session.
+
     Parameters
     ----------
+    config : dict
+        Full pipeline configuration.
     subject : str
         Subject identifier.
     session : str
@@ -226,7 +233,7 @@ def run_fmriprep(config, subject, session, job_ids=None):
     os.makedirs(f"{DERIVATIVES_DIR}/fmriprep/scripts", exist_ok=True)
 
     path_to_script = f"{DERIVATIVES_DIR}/fmriprep/scripts/{subject}_{session}_fmriprep.slurm"
-    generate_slurm_fmriprep_script(config, subject, session, path_to_script, job_ids=job_ids)
+    generate_slurm_script(config, subject, session, path_to_script, job_ids=job_ids)
 
     cmd = f"sbatch {path_to_script}"
     job_id = utils.submit_job(cmd)

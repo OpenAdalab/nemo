@@ -51,20 +51,22 @@ def is_already_processed(config, subject, session):
 
 def generate_slurm_script(config, subject, session, path_to_script, job_ids=None):
     """
-    Generate the SLURM script for QSIrecon processing.
+    Generate a SLURM script for running QSIrecon
 
     Parameters
     ----------
-    args : Namespace
-        Configuration arguments containing parameters for SLURM and QSIrecon.
+    config : dict
+        Configuration dictionary containing at least `common` and `qsirecon` sections.
     subject : str
-        Subject identifier.
+        Subject identifier (e.g., `sub-01`).
     session : str
-        Session identifier.
-    path_to_script : str
-        Path where the SLURM script will be saved.
-    job_ids : list, optional
-        List of SLURM job IDs to set as dependencies (default is None).
+        Session identifier (e.g., `ses-01`).
+    path_to_script : str or Path
+        File path where the SLURM script will be written.
+    job_ids : list[str] | None, optional
+        List of SLURM job IDs to use as dependencies via `--dependency=afterok:`.
+        Default is `None`.
+
     """
 
     common = config["common"]
@@ -158,16 +160,16 @@ def generate_slurm_script(config, subject, session, path_to_script, job_ids=None
 
 def run_qsirecon(config, subject, session, job_ids=None):
     """
-    Run the QSIrecon for a given subject and session.
+    Run QSIrecon for a given subject and session.
 
     Parameters
     ----------
-    job_ids : list, optional
-        List of SLURM job IDs to set as dependencies (default is None).
     subject : str
         Subject identifier.
     session : str
         Session identifier.
+    job_ids : list, optional
+        List of SLURM job IDs to set as dependencies (default is None).
 
     Returns
     -------

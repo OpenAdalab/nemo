@@ -4,7 +4,7 @@ This script orchestrates the execution of various neuroimaging workflows includi
 fMRIPrep, FreeSurfer, QSIprep, QSIrecon, XCP-D, and MRIQC. It reads configuration
 settings from a TOML file, checks for the existence of required data, and submits
 jobs for each workflow step based on the specified subjects and sessions.
-It also handles group-level MRIQC jobs for the processed data.
+It also handles individual and group-level MRIQC and additional QC jobs for the processed data.
 
 It is designed to be run in a Slurm environment, where each step can be submitted as a job.
 Usage:
@@ -33,6 +33,7 @@ from run_mriqc_group import run_mriqc_group
 def main(config_file=None):
     """
     Main function to execute the workflow steps based on the configuration file.
+
     Parameters
     ----------
     config_file : str, optional
@@ -175,13 +176,12 @@ def main(config_file=None):
             if workflow.get("run_qsirecon_qc"):
                 print("[QSIRECON-QC]")
                 dependencies = [job_id for job_id in [qsirecon_job_id] if job_id is not None]
-                qc_qsirecon_job_id = qc_qsirecon.run_participant_qc(
+                qc_qsirecon.run_participant_qc(
                     config,
                     subject=subject,
                     session=session,
                     job_ids=dependencies
                 )
-                qc_qsirecon_job_ids.append(qc_qsirecon_job_id)
 
             # -------------------------------------------
             # 4a fMRIPrep
@@ -232,15 +232,12 @@ def main(config_file=None):
             if workflow.get("run_xcpd_qc"):
                 print("[XCPD-QC]")
                 dependencies = [job_id for job_id in [xcpd_job_id] if job_id is not None]
-                qc_xcpd_job_id = qc_xcpd.run_participant_qc(
+                qc_xcpd.run_participant_qc(
                     config,
                     subject=subject,
                     session=session,
                     job_ids=dependencies
                 )
-            else:
-                qc_xcpd_job_id = None
-            qc_xcpd_job_ids.append(qc_xcpd_job_id)
 
         print("\n✅ Workflow submission complete for subject:", subject)
 

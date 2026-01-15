@@ -20,10 +20,11 @@ import utils
 def is_already_processed(config, subject, session):
     """
     Check if subject_session is already processed successfully.
-    if not, also check that prerequisites are met: FMRIprep is done.
 
     Parameters
     ----------
+    config : dict
+        Full pipeline configuration.
     subject : str
         Subject identifier (e.g., "sub-01").
     session : str
@@ -63,11 +64,14 @@ def is_already_processed(config, subject, session):
 # -----------------------
 # Generate SLURM job scripts
 # -----------------------
-def generate_slurm_xcpd_script(config, subject, session, path_to_script, job_ids=None):
-    """Generate the SLURM job script.
+def generate_slurm_script(config, subject, session, path_to_script, job_ids=None):
+    """
+    Generate the SLURM job script.
+
     Parameters
     ----------
-    
+    config : dict
+        Full pipeline configuration.
     subject : str
             Subject identifier.
     session : str
@@ -165,9 +169,12 @@ def generate_slurm_xcpd_script(config, subject, session, path_to_script, job_ids
 def run_xcpd(config, subject, session, job_ids=None):
     
     """
-    Run the XCP-D for a given subject and session.
+    Run XCP-D for a given subject and session.
+
     Parameters
     ----------
+    config : dict
+        Full pipeline configuration.
     subject : str
         Subject identifier.
     session : str
@@ -196,7 +203,7 @@ def run_xcpd(config, subject, session, job_ids=None):
     os.makedirs(f"{DERIVATIVES_DIR}/xcpd/work", exist_ok=True)
 
     path_to_script = f"{DERIVATIVES_DIR}/xcpd/scripts/{subject}_{session}_xcpd.slurm"
-    generate_slurm_xcpd_script(config, subject, session, path_to_script, job_ids=job_ids)
+    generate_slurm_script(config, subject, session, path_to_script, job_ids=job_ids)
 
     cmd = f"sbatch {path_to_script}"
     job_id = utils.submit_job(cmd)
