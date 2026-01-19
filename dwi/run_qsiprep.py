@@ -42,7 +42,7 @@ def is_already_processed(config, subject, session):
     for file in stdout_files:
         file_path = os.path.join(stdout_dir, file)
         with open(file_path, 'r') as f:
-            if 'QSIPrep finished successfully!' in f.read():
+            if 'QSIPrep finished successfully' in f.read():
                 return True
 
     return False
