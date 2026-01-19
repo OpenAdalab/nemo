@@ -210,13 +210,6 @@ def run_mriqc(config, subject, session, data_type="raw", job_ids=None):
         print(f"[MRIQC] Skip already processed subject {subject}_{session}")
         return None
 
-    # Create output (derivatives) directories
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/{data_type}", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/{data_type}/outputs", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/{data_type}/stdout", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/{data_type}/scripts", exist_ok=True)
-    os.makedirs(f"{DERIVATIVES_DIR}/qc/{data_type}/work", exist_ok=True)
-
     # Add dependency if this is not the first job in the chain
     path_to_script = f"{DERIVATIVES_DIR}/qc/{data_type}/scripts/mriqc_{subject}_{session}.slurm"
     generate_slurm_script(config, subject, session, path_to_script, data_type=data_type, job_ids=job_ids)

@@ -43,6 +43,13 @@ def run_participant_qc(config, subject, session, job_ids=None):
         print(f"[QSIPREP-QC] QSIPrep did not terminate for {subject} {session}. Please run QSIprep command before QC.")
         return None
 
+    # Create output (derivatives) directories
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsiprep", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsiprep/outputs", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsiprep/stdout", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsiprep/scripts", exist_ok=True)
+    os.makedirs(f"{DERIVATIVES_DIR}/qc/qsiprep/work", exist_ok=True)
+
     # Run participant-level MRIQC
     print(f"[QSIPREP-QC] Submitting MRIQC job")
     mriqc_job_id = run_mriqc(config, subject, session, data_type="qsiprep", job_ids=job_ids)
