@@ -106,6 +106,17 @@ def generate_slurm_script(config, subject, session, path_to_script, data_type="r
         f'module load singularity\n'
     )
 
+    if data_type == "fmriprep":
+        success_string = "fMRIPrep finished successfully"
+    elif data_type == "xcpd":
+        success_string = "XCP-D finished successfully"
+    elif data_type == "qsiprep":
+        success_string = "QSIPrep finished successfully"
+    elif data_type == "qsirecon":
+        success_string = "QSIRecon finished successfully"
+    else:
+        success_string = "finished successfully"
+
     prereq_check = (
         f'\n# Check that {data_type} finished without error\n'
         f'deriv_data_type_dir="{DERIVATIVES_DIR}/{data_type}/outputs/{subject}/{session}" \n'
@@ -116,18 +127,9 @@ def generate_slurm_script(config, subject, session, path_to_script, data_type="r
 
         f'stdout_dir="{DERIVATIVES_DIR}/{data_type}/stdout"\n'
         f'prefix="{data_type}_{subject}_{session}"\n'
-        f'if [ {data_type} == "fmriprep" ]; then\n'
-        f'    success_string="fMRIPrep finished successfully"\n'
-        f'elif [ {data_type} == "xcpd" ]; then\n'
-        f'    success_string="XCP-D finished successfully"\n'
-        f'elif [ {data_type} == "qsiprep" ]; then\n'
-        f'    success_string="QSIPrep finished successfully"\n'
-        f'elif [ {data_type} == "qsirecon" ]; then\n'
-        f'    success_string="QSIRecon finished successfully"\n'
-        f'fi\n'
         f'found_success=false\n'
         f'for file in $(ls $prefix*.out 2>/dev/null); do\n'
-        f'    if grep -q "$success_string" $file; then\n'
+        f'    if grep -q "${success_string}" $file; then\n'
         f'        found_success=true\n'
         f'        break\n'
         f'    fi\n'

@@ -8,15 +8,15 @@ account = ""
 email = ""
 email_frequency = "FAIL" # BEGIN,END
 ## NEMO DATABASE
-input_dir = "/scratch/lhashimoto/nemo_database/imaging_data"
-derivatives = "/scratch/lhashimoto/nemo_derivatives"
-subjects = ["1054001"]  #["1054001","1054002","1054004","1054010"]
-sessions = ["01"]
+#input_dir = "/scratch/lhashimoto/nemo_database/imaging_data"
+#derivatives = "/scratch/lhashimoto/nemo_derivatives"
+#subjects = ["1054001"]  #["1054001","1054002","1054004","1054010"]
+#sessions = ["01"]
 ## BRAINT DATABASE
-#input_dir = "/scratch/hrasoanandrianina/braint_database"
-#derivatives = "/scratch/lhashimoto/braint_derivatives"
-#subjects = ["003"]
-#sessions = ["01"] #, "02"]
+input_dir = "/scratch/hrasoanandrianina/braint_database"
+derivatives = "/scratch/lhashimoto/braint_derivatives"
+subjects = ["003"]
+sessions = ["01"] #, "02"]
 bids_filter_dir = "/scratch/lhashimoto/code/nemo/bids_filters"
 
 # =============================
@@ -32,9 +32,9 @@ run_raw_qc = false
 run_freesurfer_qc = false
 run_qsiprep_qc = false
 run_qsirecon_qc = false
-run_fmriprep_qc = false
+run_fmriprep_qc = true
 run_xcpd_qc = false
-run_group_qc = true
+run_group_qc = false
 
 # =============================
 #   PIPELINE: FreeSurfer
