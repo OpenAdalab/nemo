@@ -24,7 +24,7 @@ bids_filter_dir = "/scratch/lhashimoto/code/nemo/bids_filters"
 # =============================
 [workflow]
 run_freesurfer = false
-run_qsiprep = false
+run_qsiprep = true
 run_qsirecon = false
 run_fmriprep = false
 run_xcp_d = false
@@ -32,7 +32,7 @@ run_raw_qc = false
 run_freesurfer_qc = false
 run_qsiprep_qc = false
 run_qsirecon_qc = false
-run_fmriprep_qc = true
+run_fmriprep_qc = false
 run_xcpd_qc = false
 run_group_qc = false
 
