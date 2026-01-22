@@ -87,6 +87,8 @@ and adjusted before running the workflow.
    Make sure to keep the original copy of the default config files.
 
 2. **Activate the Python Environment**:
+
+From the connection front (no need to connect to a node)
    ```bash
    module load userspace/all
    module load python3/3.12.0
