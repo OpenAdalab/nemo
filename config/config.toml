@@ -69,7 +69,7 @@ qc_skip_existing = false
 #   PIPELINE: QSIPrep
 # =============================
 [qsiprep]
-qsiprep_container = "/scratch/lhashimoto/qsiprep-1.1.0.sif"
+qsiprep_container = "/scratch/lhashimoto/qsiprep-1.1.1.sif"
 #local_freesurfer_path = "/scratch/lhashimoto/freesurfer-7.4.1/usr/local/freesurfer"  # path to locally installed FS to
 #...replace old version in the QSIprep container which does not work (see PullRequest#19)
 config_eddy = "/scratch/lhashimoto/code/nemo/config/eddy_params.json"
