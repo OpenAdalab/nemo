@@ -33,7 +33,7 @@ Multiple sessions are possible.
 - **Singularity Containers**:
   - [FreeSurfer 7.4.1](https://hub.docker.com/r/freesurfer/freesurfer)
   - [fsqc 2.1.4](https://hub.docker.com/r/deepmi/fsqcdocker)
-  - [QSIPrep 1.0.2](https://hub.docker.com/r/pennlinc/qsiprep/)
+  - [QSIPrep 1.1.1](https://hub.docker.com/r/pennlinc/qsiprep/)
   - [QSIRecon 1.1.1](https://hub.docker.com/r/pennlinc/qsirecon/)
   - [fMRIPrep 25.2.2](https://hub.docker.com/r/nipreps/fmriprep) (or >25.2.0) LTS
   - [XCP-D 0.12.0](https://hub.docker.com/r/pennlinc/xcp_d/)
