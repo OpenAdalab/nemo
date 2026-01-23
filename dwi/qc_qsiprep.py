@@ -63,6 +63,8 @@ def run_participant_qc(config, subject, session, job_ids=None):
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_qsiprep_{subject}_{session}_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_qsiprep_{subject}_{session}_%j.err ')
+    if common.get("account"):
+        cmd += f'--account={common["account"]} '
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
     # Call to python scripts for the rest of QC
@@ -109,6 +111,8 @@ def run_group_qc(config, job_ids=None):
            f'--time={mriqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_group_qsiprep_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/qsiprep/stdout/qc_group_qsiprep_%j.err ')
+    if common.get("account"):
+        cmd += f'--account={common["account"]} '
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
     cmd += f"python3 dwi/qc_qsiprep.py '{json.dumps(config)}' group &"

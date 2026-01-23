@@ -442,7 +442,8 @@ def run(config, job_ids=None):
            f'--time={fsqc["requested_time"]} '
            f'--out={DERIVATIVES_DIR}/qc/freesurfer/stdout/qc_freesurfer_%j.out '
            f'--err={DERIVATIVES_DIR}/qc/freesurfer/stdout/qc_freesurfer_%j.err ')
-
+    if common.get("account"):
+        cmd += f'--account={common["account"]} '
     if job_ids:
         cmd += f'--dependency=afterok:{":".join(job_ids)} '
 
