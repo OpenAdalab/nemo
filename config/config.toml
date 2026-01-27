@@ -119,6 +119,7 @@ requested_mem = "64"
 requested_time = "8:00:00"
 reserved_cpus = 8
 omp_threads = 4
+atlases = ["4S156Parcels"] #, "4S356Parcels"]
 skip_processed = true
 
 # =============================

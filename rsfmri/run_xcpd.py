@@ -154,6 +154,7 @@ def generate_slurm_script(config, subject, session, path_to_script, job_ids=None
         f'      --mode linc \\\n'
         f'      --bids-filter-file /bids_filter_dir/bids_filter_{session}.json \\\n'
         f'      --nuisance-regressors 36P \\\n'
+        f'      --atlases {" ".join(xcpd["atlases"])} \\\n'
         f'      --work-dir /out/work \\\n'
         f'      --config-file /config/xcpd_config.toml \\\n'
     )
