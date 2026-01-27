@@ -39,6 +39,20 @@ Multiple sessions are possible.
   - [XCP-D 0.12.0](https://hub.docker.com/r/pennlinc/xcp_d/)
   - [MRIQC 24.0.2](https://hub.docker.com/r/nipreps/mriqc/)
 
+To setup the environment do
+````commandline
+module load userspace/all
+module load python3/3.12.0
+python3.12 -m venv /path/to/env/
+source /path/to/env/bin/activate
+cd /path/to/this/repository/
+pip3 install -r requirements.txt
+````
+or
+````commandline
+pip3 install numpy==2.2.1 pandas==2.2.3 scipy==1.15.0 nibabel==5.3.2 toml
+````
+
 To pull container images, please adapt the `config/containers.toml` configuration file and run the following command
 ````commandline
 python3 pull_singularity_images.py --config config/containers.toml
