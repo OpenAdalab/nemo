@@ -149,7 +149,7 @@ def metric_extraction(config, subject, session):
         file_count = utils.count_files(output_dir)
 
         # Load TSV file produced by QSIprep
-        qsiprep_metrics = f'{subject}_{session}_run-01_desc-confounds_timeseries.tsv'
+        qsiprep_metrics = next(anat.glob("*_desc-confounds_timeseries.tsv"))
         df = pd.read_csv(os.path.join(output_dir, 'dwi', qsiprep_metrics), sep='\t')
 
         max_framewise_displacement = df['framewise_displacement'].max()
