@@ -139,18 +139,18 @@ def generate_slurm_script(config, subject, session, path_to_script):
         f'\napptainer run \\\n'
         f'    --cleanenv \\\n'
         f'    -B {BIDS_DIR}:/data:ro \\\n'
-        # f'    -B {DERIVATIVES_DIR}/freesurfer/outputs:/out \\\n'
-        f'    -B {DERIVATIVES_DIR}/freesurfer/outputs:/usr/local/freesurfer/subjects \\\n'
+        f'    -B {DERIVATIVES_DIR}/freesurfer/outputs:/out \\\n'
+        # f'    -B {DERIVATIVES_DIR}/freesurfer/outputs:/usr/local/freesurfer/subjects \\\n'
         f'    -B {common["freesurfer_license"]}:/license \\\n'
         f'    --env FS_LICENSE=/license/license.txt \\\n'
         f'    {freesurfer["freesurfer_container"]} bash -c \\\n'
         f'        "source /usr/local/freesurfer/SetUpFreeSurfer.sh && \\\n'
-        # f'        export SUBJECTS_DIR=/out && \\\n'  # to get a copy of fsaverage directory out of the container
+        f'        export SUBJECTS_DIR=/out && \\\n'  # to get a copy of fsaverage directory out of the container
         f'        recon-all \\\n'
         f'            -all \\\n'
         f'            -s {subject}_{session} \\\n'
         f'            -i /data/{subject}/{session}/anat/{subject}_{session}_T1w.nii.gz'  # \\\n
-        # f'            -sd /out'
+        f'            -sd /out'
     )
 
     if common.get("use_t2"):
