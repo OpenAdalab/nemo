@@ -149,7 +149,7 @@ def generate_slurm_script(config, subject, session, path_to_script):
         f'        recon-all \\\n'
         f'            -all \\\n'
         f'            -s {subject}_{session} \\\n'
-        f'            -i /data/{subject}/{session}/anat/{subject}_{session}_T1w.nii.gz'  # \\\n
+        f'            -i /data/{subject}/{session}/anat/{subject}_{session}_T1w.nii.gz \\\n'  #
         f'            -sd /out'
     )
 
