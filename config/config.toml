@@ -8,22 +8,22 @@ account = ""
 email = ""
 email_frequency = "FAIL" # BEGIN,END
 ## NEMO DATABASE
-#input_dir = "/scratch/lhashimoto/nemo_database/imaging_data"
-#derivatives = "/scratch/lhashimoto/nemo_derivatives"
-#subjects = ["1054001"]  #["1054001","1054002","1054004","1054010"]
-#sessions = ["01"]
+input_dir = "/scratch/lhashimoto/nemo_database/imaging_data"
+derivatives = "/scratch/lhashimoto/nemo_derivatives"
+subjects = ["1054017"]  #["1054001","1054002","1054004","1054010"]
+sessions = ["01"]
 ## BRAINT DATABASE
-input_dir = "/scratch/hrasoanandrianina/braint_database"
-derivatives = "/scratch/lhashimoto/braint_derivatives"
-subjects = ["003"]
-sessions = ["01"] #, "02"]
-bids_filter_dir = "/scratch/lhashimoto/code/nemo/bids_filters"
+#input_dir = "/scratch/hrasoanandrianina/braint_database"
+#derivatives = "/scratch/lhashimoto/braint_derivatives"
+#subjects = ["003"]
+#sessions = ["01"] #, "02"]
+#bids_filter_dir = "/scratch/lhashimoto/code/nemo/bids_filters"
 
 # =============================
 #   WORKFLOW SETTINGS
 # =============================
 [workflow]
-run_freesurfer = false
+run_freesurfer = true
 run_qsiprep = false
 run_qsirecon = false
 run_fmriprep = false
@@ -41,7 +41,7 @@ run_group_qc = false
 # =============================
 [freesurfer]
 freesurfer_container = "/scratch/lhashimoto/freesurfer-7.4.1.sif"
-use_t2 = true
+use_t2 = false
 partition = "skylake"
 requested_mem = "16"
 requested_time = "9:00:00"
