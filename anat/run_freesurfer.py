@@ -141,6 +141,7 @@ def generate_slurm_script(config, subject, session, path_to_script):
         f'    -B {BIDS_DIR}:/data:ro \\\n'
         f'    -B {DERIVATIVES_DIR}/freesurfer/outputs:/out \\\n'
         # f'    -B {DERIVATIVES_DIR}/freesurfer/outputs:/usr/local/freesurfer/subjects \\\n'
+        f'    -B {DERIVATIVES_DIR}/freesurfer/outputs/fsaverage:/usr/local/freesurfer/subjects/fsaverage \\\n'
         f'    -B {common["freesurfer_license"]}:/license \\\n'
         f'    --env FS_LICENSE=/license/license.txt \\\n'
         f'    {freesurfer["freesurfer_container"]} bash -c \\\n'
