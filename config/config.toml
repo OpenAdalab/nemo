@@ -9,8 +9,8 @@ email = ""
 email_frequency = "FAIL" # BEGIN,END
 ## NEMO DATABASE
 input_dir = "/scratch/lhashimoto/nemo_database/imaging_data"
-derivatives = "/scratch/lhashimoto/nemo_deriv_test2"
-subjects = ["1054019"]  #["1054001","1054002","1054004","1054010"]
+derivatives = "/scratch/lhashimoto/nemo_deriv_test"
+subjects = ["1054018"]  #["1054001","1054002","1054004","1054010"]
 sessions = ["01"]
 ## BRAINT DATABASE
 #input_dir = "/scratch/hrasoanandrianina/braint_database"
