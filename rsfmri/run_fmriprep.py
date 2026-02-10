@@ -184,8 +184,10 @@ def generate_slurm_script(config, subject, session, path_to_script, job_ids=None
     # FMRIPrep does not handle correctly the sessionwise option and leaves the anat folder in a common directory
     # for all sessions. Here we just move all files into the session's subdirectory
     save_work = (
-        f'\nrsync -av {DERIVATIVES_DIR}/fmriprep/outputs/{subject}/anat/ {DERIVATIVES_DIR}/fmriprep/outputs/{subject}/{session}/anat/\n'
-        f'\nrm -rf {DERIVATIVES_DIR}/fmriprep/outputs/{subject}/anat\n'
+        f'if [ -d "{DERIVATIVES_DIR}/fmriprep/outputs/{subject}/anat" ]; then\n'
+        f'    rsync -av "{DERIVATIVES_DIR}/fmriprep/outputs/{subject}/anat/" "{DERIVATIVES_DIR}/fmriprep/outputs/{subject}/{session}/anat/"\n'
+        f'    rm -rf "{DERIVATIVES_DIR}/fmriprep/outputs/{subject}/anat"\n'
+        f'fi\n'
         f'\nchmod -Rf 771 {DERIVATIVES_DIR}/fmriprep\n'
     )
 
