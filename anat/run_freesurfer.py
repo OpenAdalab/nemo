@@ -144,7 +144,7 @@ def generate_slurm_script(config, subject, session, path_to_script):
         f'    -B {common["freesurfer_license"]}:/license \\\n'
         f'    --env FS_LICENSE=/license/license.txt \\\n'
         f'    {freesurfer["freesurfer_container"]} bash -c \\\n'
-        f'        if [ ! -d /out/fsaverage ]; then cp -r /usr/local/freesurfer/subjects/fsaverage /out/; fi && \\\n' # copy fsaverage out of the container
+        f'        "if [ ! -d /out/fsaverage ]; then cp -r /usr/local/freesurfer/subjects/fsaverage /out/; fi && \\\n' # copy fsaverage out of the container
         f'        source /usr/local/freesurfer/SetUpFreeSurfer.sh && \\\n'
         f'        export SUBJECTS_DIR=/out && \\\n'
         f'        recon-all \\\n'
