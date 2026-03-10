@@ -175,7 +175,7 @@ def generate_slurm_script(config, subject, session, path_to_script, job_ids=None
         f'    --subject-anatomical-reference {fmriprep["subject_anatomical_reference"]} \\\n'
         f'    --skip-bids-validation \\\n'
         f'    --work-dir /out/work \\\n'
-        f'    --config-file /config/fmriprep_config.toml \\\n'
+        f'    --config-file /config/fmriprep_config.toml \n'
         # f'    --fs-no-reconall\n'  # The fs-no-recon-all step will disable further downstream surface level steps,
         # like boundary based registration, which you should want to keep. The volumetric analogs may be quicker,
         # but generally do not perform as well.
