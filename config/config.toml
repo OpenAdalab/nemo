@@ -44,7 +44,7 @@ freesurfer_container = "/scratch/lhashimoto/freesurfer-7.4.1.sif"
 use_t2 = false
 partition = "skylake"
 requested_mem = "16"
-requested_time = "9:00:00"
+requested_time = "15:00:00"
 skip_processed = true
 
 # =============================
