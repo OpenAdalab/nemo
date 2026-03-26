@@ -154,7 +154,7 @@ def generate_slurm_script(config, subject, session, path_to_script):
         f'            -sd /out'
     )
 
-    if common.get("use_t2"):
+    if freesurfer.get("use_t2"):
         singularity_command += (
             f' \\\n            -T2 /data/{subject}/{session}/anat/{subject}_{session}_T2w.nii.gz \\\n'
             f'            -T2pial'
