@@ -41,7 +41,7 @@ run_group_qc = false
 # =============================
 [freesurfer]
 freesurfer_container = "/scratch/lhashimoto/freesurfer-7.4.1.sif"
-use_t2 = false
+use_t2 = true
 partition = "skylake"
 requested_mem = "16"
 requested_time = "15:00:00"

@@ -159,6 +159,9 @@ def generate_slurm_script(config, subject, session, path_to_script):
             f' \\\n            -T2 /data/{subject}/{session}/anat/{subject}_{session}_T2w.nii.gz \\\n'
             f'            -T2pial'
         )
+    else:
+        print(f"[FREESURFER] Warning: Running FreeSurfer without T2w input. "
+              f"This may lead to suboptimal pial surface reconstruction.")
 
     singularity_command += '"\n'  # terminate the command pipe
 
