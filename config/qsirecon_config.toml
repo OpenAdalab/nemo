@@ -17,7 +17,7 @@ write_graph = false
 b0_threshold = 50
 infant = false
 input_type = "qsiprep"
-recon_spec = "dsi_studio_autotrack"  # "dsi_studio_gqi" "mrtrix_multishell_msmt_ACT-hsvs"
+recon_spec = "mrtrix_multishell_msmt_ACT"  # "dsi_studio_gqi" "mrtrix_multishell_msmt_ACT-hsvs"
 output_resolution = 1.8
 spaces = "MNI152NLin2009cAsym"
 
